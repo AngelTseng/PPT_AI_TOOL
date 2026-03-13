@@ -38,4 +38,13 @@ The UI will open in your browser.
 Default address:
 http://localhost:8501
 
+How to set API_KEY
 ------------
+Open PowerShell
+setx OPENAI_API_KEY "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+You can test whether is ready by:
+echo $env:OPENAI_API_KEY
+
+------------
+
