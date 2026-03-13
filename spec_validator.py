@@ -1,14 +1,10 @@
-SUPPORTED_TYPES = {
-    "cover",
-    "agenda",
-    "section",
-    "content_2",
-    "content_3extra",
-    "content_4",
-    "table",
-    "flow",
-    "end"
-}
+from slide_registry import SLIDE_REGISTRY
+
+SUPPORTED_TYPES = set(SLIDE_REGISTRY.keys())
+
+CONTENT_2_TYPES = {"content_2", "content_2_a", "content_2_b", "content_2_c"}
+CONTENT_4_TYPES = {"content_4", "content_4_a", "content_4_b"}
+CONTENT_TYPES = CONTENT_2_TYPES | CONTENT_4_TYPES | {"content_3extra", "content_image", "table", "flow"}
 
 
 def check_slide_diversity(spec: dict):
@@ -48,34 +44,30 @@ def check_agenda_coverage(spec: dict):
         return warnings
 
     items = agenda_slide.get("items", [])
-    content_like = [
-        s for s in slides
-        if s.get("type") in ("section", "content_2", "content_3extra", "content_4", "table", "flow")
-    ]
+    content_like = [s for s in slides if s.get("type") in ({"section"} | CONTENT_TYPES)]
 
     if len(content_like) < len(items):
         warnings.append("Agenda items may exceed available explanatory slides.")
 
     return warnings
 
+
 def check_section_coverage(spec: dict):
     warnings = []
     slides = spec.get("slides", [])
 
-    content_types = {"content_2", "content_3extra", "content_4", "table", "flow"}
-
     for i, slide in enumerate(slides[:-1]):
         if slide.get("type") == "section":
             next_type = slides[i + 1].get("type")
-            if next_type not in content_types:
+            if next_type not in CONTENT_TYPES:
                 warnings.append(
                     f"Section slide at position {i+1} is not immediately followed by a content slide."
                 )
 
     return warnings
 
-def validate_deck_spec(spec: dict):
 
+def validate_deck_spec(spec: dict):
     errors = []
     warnings = []
 
@@ -83,14 +75,9 @@ def validate_deck_spec(spec: dict):
 
     if not isinstance(slides, list) or not slides:
         errors.append("slides must be a non-empty list")
-        return {
-            "errors": errors,
-            "warnings": warnings,
-            "normalized_spec": spec
-        }
+        return {"errors": errors, "warnings": warnings, "normalized_spec": spec}
 
     for i, slide in enumerate(slides, start=1):
-
         t = slide.get("type")
 
         if t not in SUPPORTED_TYPES:
@@ -104,7 +91,7 @@ def validate_deck_spec(spec: dict):
             elif len(items) > 5:
                 warnings.append(f"slides[{i}].items >5 , extra ignored")
 
-        elif t == "content_2":
+        elif t in CONTENT_2_TYPES:
             cards = slide.get("cards", [])
             if not isinstance(cards, list):
                 errors.append(f"slides[{i}].cards must be list")
@@ -118,12 +105,18 @@ def validate_deck_spec(spec: dict):
             elif len(cards) > 3:
                 warnings.append(f"slides[{i}].cards >3 , extra ignored")
 
-        elif t == "content_4":
+        elif t in CONTENT_4_TYPES:
             cards = slide.get("cards", [])
             if not isinstance(cards, list):
                 errors.append(f"slides[{i}].cards must be list")
             elif len(cards) > 4:
                 warnings.append(f"slides[{i}].cards >4 , extra ignored")
+
+        elif t == "content_image":
+            if not slide.get("title"):
+                errors.append(f"slides[{i}].title is required")
+            if not slide.get("content"):
+                errors.append(f"slides[{i}].content is required")
 
         elif t == "flow":
             steps = slide.get("steps", [])
@@ -133,10 +126,8 @@ def validate_deck_spec(spec: dict):
         elif t == "table":
             columns = slide.get("columns", [])
             rows = slide.get("rows", [])
-
             if not isinstance(columns, list) or not columns:
                 errors.append(f"slides[{i}].columns invalid")
-
             if not isinstance(rows, list) or not rows:
                 errors.append(f"slides[{i}].rows invalid")
 
@@ -144,8 +135,4 @@ def validate_deck_spec(spec: dict):
     warnings.extend(check_agenda_coverage(spec))
     warnings.extend(check_section_coverage(spec))
 
-    return {
-        "errors": errors,
-        "warnings": warnings,
-        "normalized_spec": spec
-    }
+    return {"errors": errors, "warnings": warnings, "normalized_spec": spec}
