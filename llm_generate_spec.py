@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 from openai import OpenAI
 
-client = OpenAI()
+from config import OPENAI_MODEL
 
-MODEL = "gpt-4.1-mini"
+client = OpenAI()
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATE_MAP_PATH = BASE_DIR / "template_map.json"
@@ -292,7 +292,7 @@ def generate_spec(user_prompt: str) -> dict:
 
     try:
         resp = client.chat.completions.create(
-            model=MODEL,
+            model=OPENAI_MODEL,
             messages=[
                 {"role": "developer", "content": developer_prompt},
                 {"role": "user", "content": user_prompt},
