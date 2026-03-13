@@ -6,6 +6,51 @@ import pythoncom
 
 SLIDE_RENDERERS = {}
 
+MsoAutoSizeTextToFitShape = 2
+MsoTrue = -1
+
+
+def _fit_text_to_shape(shape):
+    """Best-effort: keep text inside the textbox instead of overflowing."""
+    try:
+        shape.TextFrame2.WordWrap = MsoTrue
+        shape.TextFrame2.AutoSize = MsoAutoSizeTextToFitShape
+        return
+    except Exception:
+        pass
+
+    try:
+        shape.TextFrame.WordWrap = MsoTrue
+        shape.TextFrame.AutoSize = 1
+    except Exception:
+        pass
+
+
+def _clamp_shape_within_slide(slide, shape):
+    """If a shape is moved outside the page bounds, clamp it back."""
+    try:
+        sw = float(slide.Parent.PageSetup.SlideWidth)
+        sh = float(slide.Parent.PageSetup.SlideHeight)
+
+        left = float(shape.Left)
+        top = float(shape.Top)
+        width = float(shape.Width)
+        height = float(shape.Height)
+
+        max_left = max(0.0, sw - width)
+        max_top = max(0.0, sh - height)
+
+        new_left = min(max(left, 0.0), max_left)
+        new_top = min(max(top, 0.0), max_top)
+
+        if abs(new_left - left) > 0.1:
+            shape.Left = new_left
+        if abs(new_top - top) > 0.1:
+            shape.Top = new_top
+    except Exception:
+        pass
+
+
 def register_renderer(name):
     def wrapper(func):
         SLIDE_RENDERERS[name] = func
@@ -322,17 +367,21 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False):
     tr = shp.TextFrame.TextRange
     tr.Text = text
 
+    # Keep text within textbox and avoid visual overflow when content is longer.
+    _fit_text_to_shape(shp)
+    _clamp_shape_within_slide(slide, shp)
+
     if bold is not None:
         try:
             tr.Font.Bold = bool(bold)
-        except:
+        except Exception:
             pass
 
     if auto_color:
         color = detect_slide_text_color(slide)
         try:
             tr.Font.Color.RGB = color
-        except:
+        except Exception:
             pass
 
     return True

@@ -204,6 +204,12 @@ Slide usage guidance:
 - Use flow for processes, sequences, collaboration stages, development lifecycle, or learning paths.
 - Use section to break major topics and improve presentation rhythm.
 
+Content quality rules:
+- section.name must always be non-empty and explicit.
+- For content cards, avoid single short phrases; each content should be 1 concise sentence (about 18-40 chars in Chinese or 8-20 words in English).
+- For content_image.content, write at least one complete concise sentence (about 24+ chars in Chinese or 12+ words in English).
+- For flow.steps, each step should be descriptive (not just 1-2 words).
+
 Layout adaptation rules:
 - If content naturally fits 2 grouped ideas, prefer content_2 instead of forcing it into content_3extra.
 - If content naturally fits 4 grouped ideas, prefer content_4 or table instead of forcing it into content_3extra.
