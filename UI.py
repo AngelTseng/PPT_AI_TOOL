@@ -213,14 +213,14 @@ st.markdown("""
     }
 
     /* ===== Clear Button ===== */
-    button[data-testid="baseButton-secondary"] {
+    .stButton > button[kind="secondary"] {
         background-color: #ffeaea;
         color: #c53030;
         border: 1px solid #f5b5b5;
         border-radius: 8px;
     }
 
-    button[data-testid="baseButton-secondary"]:hover {
+    .stButton > button[kind="secondary"]:hover {
         background-color: #ffd6d6;
     }
 
