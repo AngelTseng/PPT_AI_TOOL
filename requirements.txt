@@ -1,0 +1,6 @@
+streamlit
+pywin32
+python-pptx
+pydantic
+openai
+tqdm
