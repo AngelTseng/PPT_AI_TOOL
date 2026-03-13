@@ -1,0 +1,749 @@
+[
+  {
+    "slide_index": 1,
+    "layout": "Custom Layout",
+    "detected_type": "cover",
+    "shapes": [
+      {
+        "name": "Topic",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "speaker_name",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "Straight Connector 18",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)"
+      },
+      {
+        "name": "圖片 1",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      }
+    ]
+  },
+  {
+    "slide_index": 2,
+    "layout": "4_EXTRA",
+    "detected_type": "agenda",
+    "shapes": [
+      {
+        "name": "outline",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "agenda_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "agenda_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "Straight Connector 5",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)"
+      },
+      {
+        "name": "Oval 14",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "Oval 16",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "Oval 17",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "Oval 18",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "Oval 14",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "agenda_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "agenda_4",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "agenda_5",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 3,
+    "layout": "ALTERNATE DARK BG",
+    "detected_type": "section",
+    "shapes": [
+      {
+        "name": "agenda_name",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 4,
+    "layout": "3_EXTRA",
+    "detected_type": "content_3extra",
+    "shapes": [
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "Straight Connector 13",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "img_1",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "img_2",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "img_3",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      }
+    ]
+  },
+  {
+    "slide_index": 5,
+    "layout": "3_EXTRA",
+    "detected_type": "content_2",
+    "shapes": [
+      {
+        "name": "img_2",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "img_1",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "矩形: 剪去同側角落 1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 6,
+    "layout": "3_EXTRA",
+    "detected_type": "content_2",
+    "shapes": [
+      {
+        "name": "直角三角形 3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "img_1",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "img_2",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      }
+    ]
+  },
+  {
+    "slide_index": 7,
+    "layout": "3_EXTRA",
+    "detected_type": "table",
+    "shapes": [
+      {
+        "name": "矩形: 剪去同側角落 1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "sheet_1",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": true,
+        "has_chart": false,
+        "shape_type": "TABLE (19)"
+      }
+    ]
+  },
+  {
+    "slide_index": 8,
+    "layout": "3_EXTRA",
+    "detected_type": "unknown",
+    "shapes": [
+      {
+        "name": "矩形: 剪去同側角落 5",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "img",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      }
+    ]
+  },
+  {
+    "slide_index": 9,
+    "layout": "3_EXTRA",
+    "detected_type": "content_2",
+    "shapes": [
+      {
+        "name": "圖片 7",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "圖片 9",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "矩形 11",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "item_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "矩形 19",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 10,
+    "layout": "3_EXTRA",
+    "detected_type": "content_4",
+    "shapes": [
+      {
+        "name": "直線接點 12",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)"
+      },
+      {
+        "name": "直線接點 15",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)"
+      },
+      {
+        "name": "直線接點 17",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)"
+      },
+      {
+        "name": "直線接點 18",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)"
+      },
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_4",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "圖片 27",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 11,
+    "layout": "3_EXTRA",
+    "detected_type": "content_4",
+    "shapes": [
+      {
+        "name": "矩形 11",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "item_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "矩形 19",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_4",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_4",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 12,
+    "layout": "3_EXTRA",
+    "detected_type": "flow",
+    "shapes": [
+      {
+        "name": "矩形: 剪去同側角落 1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "flow_chart_1",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "None"
+      }
+    ]
+  },
+  {
+    "slide_index": 13,
+    "layout": "1_標題投影片",
+    "detected_type": "end",
+    "shapes": [
+      {
+        "name": "Picture 2",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "文字方塊 27",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "文字方塊 4",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "Picture Placeholder 5",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PICTURE (13)"
+      },
+      {
+        "name": "投影片編號版面配置區 4",
+        "is_placeholder": true,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "PLACEHOLDER (14)"
+      }
+    ]
+  }
+]
