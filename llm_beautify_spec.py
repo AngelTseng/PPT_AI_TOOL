@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 from openai import OpenAI
 
-client = OpenAI()
+from config import OPENAI_MODEL
 
-MODEL = "gpt-4.1-mini"
+client = OpenAI()
 
 BASE_DIR = Path(__file__).resolve().parent
 INPUT_SPEC = BASE_DIR / "extracted_deck_spec.json"
@@ -273,7 +273,7 @@ def beautify_spec(extracted_spec: dict) -> dict:
     prompt = build_prompt(extracted_spec)
 
     resp = client.chat.completions.create(
-        model=MODEL,
+        model=OPENAI_MODEL,
         messages=[
             {"role": "developer", "content": "Return only valid JSON matching the schema."},
             {"role": "user", "content": prompt},
