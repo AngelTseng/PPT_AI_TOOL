@@ -211,19 +211,29 @@ def detect_slide_type(slide) -> str:
     if shape_by_name(slide, "agenda_name"):
         return "section"
 
-    count = 0
-    for i in range(1,6):
-        if shape_by_name(slide, f"item_{i}"):
-            count += 1
+    # content_image
+    if shape_by_name(slide, "title") and shape_by_name(slide, "content") and shape_by_name(slide, "img"):
+        return "content_image"
 
-    if count == 2:
-        return "content_2"
+    # content_4 variants
+    if shape_by_name(slide, "content_1") and shape_by_name(slide, "content_2") and shape_by_name(slide, "content_3") and shape_by_name(slide, "content_4"):
+        if shape_by_name(slide, "item_1") and shape_by_name(slide, "item_2") and shape_by_name(slide, "item_3") and shape_by_name(slide, "item_4"):
+            return "content_4_b"
+        return "content_4_a"
 
-    elif count == 3:
+    # content_3extra
+    if shape_by_name(slide, "item_1") and shape_by_name(slide, "item_2") and shape_by_name(slide, "item_3") and shape_by_name(slide, "content_1") and shape_by_name(slide, "content_2") and shape_by_name(slide, "content_3"):
         return "content_3extra"
 
-    elif count == 4:
-        return "content_4"
+    # content_2 variants
+    if shape_by_name(slide, "item_1") and shape_by_name(slide, "item_2") and shape_by_name(slide, "content_1") and shape_by_name(slide, "content_2") and not shape_by_name(slide, "item_3") and not shape_by_name(slide, "content_3"):
+        return "content_2_c"
+
+    if shape_by_name(slide, "title") and shape_by_name(slide, "content_1") and shape_by_name(slide, "content_2") and shape_by_name(slide, "img_1") and shape_by_name(slide, "img_2"):
+        return "content_2_a"
+
+    if shape_by_name(slide, "content_1") and shape_by_name(slide, "content_2") and shape_by_name(slide, "img_1") and shape_by_name(slide, "img_2"):
+        return "content_2_b"
 
     # table
     shp = shape_by_name(slide, "sheet_1")
@@ -297,6 +307,45 @@ def extract_content_3extra(slide):
     }
 
 
+def extract_content_2(slide, variant: str):
+    cards = []
+    for i in range(1, 3):
+        item = get_text_from_shape(slide, f"item_{i}") or f"Point {i}"
+        content = get_text_from_shape(slide, f"content_{i}")
+        if item or content:
+            cards.append({"item": item, "content": content})
+
+    return {
+        "type": variant,
+        "title": get_text_from_shape(slide, "title"),
+        "cards": cards,
+    }
+
+
+def extract_content_4(slide, variant: str):
+    cards = []
+    for i in range(1, 5):
+        item = get_text_from_shape(slide, f"item_{i}") or f"Point {i}"
+        content = get_text_from_shape(slide, f"content_{i}")
+        if item or content:
+            cards.append({"item": item, "content": content})
+
+    return {
+        "type": variant,
+        "title": get_text_from_shape(slide, "title"),
+        "cards": cards,
+    }
+
+
+def extract_content_image(slide):
+    return {
+        "type": "content_image",
+        "title": get_text_from_shape(slide, "title"),
+        "content": get_text_from_shape(slide, "content"),
+        "images": extract_images(slide),
+    }
+
+
 def extract_table(slide):
     columns, rows = get_table_data(slide, "sheet_1")
     return {
@@ -344,11 +393,6 @@ def extract_unknown(slide):
     }
 
 def extract_slide(slide):
-    print(f"[DEBUG] extracting slide {slide.SlideIndex}")
-    slide_type = detect_slide_type(slide)
-    print(f"[DEBUG] detected type: {slide_type}")
-
-def extract_slide(slide):
     slide_type = detect_slide_type(slide)
 
     if slide_type == "cover":
@@ -359,6 +403,12 @@ def extract_slide(slide):
         return extract_section(slide)
     elif slide_type == "content_3extra":
         return extract_content_3extra(slide)
+    elif slide_type in ("content_2", "content_2_a", "content_2_b", "content_2_c"):
+        return extract_content_2(slide, slide_type)
+    elif slide_type in ("content_4", "content_4_a", "content_4_b"):
+        return extract_content_4(slide, slide_type)
+    elif slide_type == "content_image":
+        return extract_content_image(slide)
     elif slide_type == "table":
         return extract_table(slide)
     elif slide_type == "flow":
