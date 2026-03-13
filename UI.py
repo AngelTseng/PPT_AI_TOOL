@@ -144,27 +144,28 @@ def show_result_box(title: str, result: dict | None, clear_key: str):
     if not result:
         return
 
-    st.success(title)
+    with st.container(key=f"result_box_{clear_key}"):
+        st.success(title)
 
-    if result.get("summary"):
-        st.caption(result["summary"])
+        if result.get("summary"):
+            st.caption(result["summary"])
 
-    files = result.get("files", [])
-    if files:
-        cols = st.columns(len(files))
-        for col, file_info in zip(cols, files):
-            with col:
-                st.download_button(
-                    label=f"⬇ {file_info['label']}",
-                    data=read_file_bytes(Path(file_info["path"])),
-                    file_name=file_info["name"],
-                    mime=file_info["mime"],
-                    use_container_width=True,
-                    key=f"download_{file_info['name']}"
-                )
+        files = result.get("files", [])
+        if files:
+            cols = st.columns(len(files))
+            for col, file_info in zip(cols, files):
+                with col:
+                    st.download_button(
+                        label=f"⬇ {file_info['label']}",
+                        data=read_file_bytes(Path(file_info["path"])),
+                        file_name=file_info["name"],
+                        mime=file_info["mime"],
+                        use_container_width=True,
+                        key=f"download_{file_info['name']}"
+                    )
 
-    if st.button("🗑 Clear result", key=clear_key, use_container_width=True):
-        return "clear"
+        if st.button("🗑 Clear result", key=clear_key, use_container_width=True):
+            return "clear"
 
 # =========================
 # UI Header
@@ -212,17 +213,18 @@ st.markdown("""
         background-color: #e6e8eb;
     }
 
-    /* ===== Clear Button ===== */
-    .stButton > button[kind="secondary"] {
+    /* ===== Clear Button (scoped to result box only) ===== */
+    [class*="st-key-result_box_clear_"] .stButton > button[kind="secondary"] {
         background-color: #ffeaea;
         color: #c53030;
         border: 1px solid #f5b5b5;
         border-radius: 8px;
     }
 
-    .stButton > button[kind="secondary"]:hover {
+    [class*="st-key-result_box_clear_"] .stButton > button[kind="secondary"]:hover {
         background-color: #ffd6d6;
     }
+
 
     /* ===== Success Box ===== */
     div[data-testid="stAlert"] {
