@@ -345,7 +345,6 @@ def extract_content_image(slide):
         "images": extract_images(slide),
     }
 
-
 def extract_table(slide):
     columns, rows = get_table_data(slide, "sheet_1")
     return {
@@ -391,6 +390,7 @@ def extract_unknown(slide):
         "has_table": has_table,
         "has_smartart": has_smartart,
     }
+    
 
 def extract_slide(slide):
     slide_type = detect_slide_type(slide)
@@ -401,6 +401,7 @@ def extract_slide(slide):
         return extract_agenda(slide)
     elif slide_type == "section":
         return extract_section(slide)
+    
     elif slide_type == "content_3extra":
         return extract_content_3extra(slide)
     elif slide_type in ("content_2", "content_2_a", "content_2_b", "content_2_c"):
@@ -411,6 +412,7 @@ def extract_slide(slide):
         return extract_content_image(slide)
     elif slide_type == "table":
         return extract_table(slide)
+    
     elif slide_type == "flow":
         return extract_flow(slide)
     else:
