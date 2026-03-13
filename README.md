@@ -7,6 +7,13 @@ Requirements
 1. Windows
 2. Python 3.10+
 3. Microsoft PowerPoint installed
+4. Python module:
+  streamlit
+  pywin32
+  python-pptx
+  pydantic
+  openai
+  tqdm
 
 Installation
 ------------
