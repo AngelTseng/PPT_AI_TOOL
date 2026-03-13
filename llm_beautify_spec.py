@@ -3,10 +3,12 @@ from pathlib import Path
 from openai import OpenAI
 
 from config import OPENAI_MODEL
+from slide_registry import SLIDE_REGISTRY
 
 client = OpenAI()
 
 BASE_DIR = Path(__file__).resolve().parent
+SUPPORTED_SLIDE_TYPES = list(SLIDE_REGISTRY.keys())
 INPUT_SPEC = BASE_DIR / "extracted_deck_spec.json"
 OUTPUT_SPEC = BASE_DIR / "beautified_deck_spec.json"
 
@@ -24,25 +26,12 @@ BEAUTIFY_SCHEMA = {
                     "properties": {
                         "type": {
                             "type": "string",
-                            "enum": [
-                                "cover",
-                                "agenda",
-                                "section",
-                                "content_3extra",
-                                "content_2_a",
-                                "content_2_b",
-                                "content_2_c",
-                                "table",
-                                "content_image",
-                                "content_4_a",
-                                "content_4_b",
-                                "flow",
-                                "end",
-                            ]
+                            "enum": SUPPORTED_SLIDE_TYPES
                         },
                         "topic": {"type": "string"},
                         "speaker": {"type": "string"},
                         "title": {"type": "string"},
+                        "content": {"type": "string"},
                         "items": {
                             "type": "array",
                             "items": {"type": "string"},
@@ -95,12 +84,16 @@ BEAUTIFY_SCHEMA = {
                             "then": {"required": ["type", "name"]}
                         },
                         {
-                         "if": {"properties": {"type": {"const": "content_2"}}},
+                         "if": {"properties": {"type": {"enum": ["content_2", "content_2_a", "content_2_b", "content_2_c"]}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
-                            "if": {"properties": {"type": {"const": "content_4"}}},
+                            "if": {"properties": {"type": {"enum": ["content_4", "content_4_a", "content_4_b"]}}},
                             "then": {"required": ["type", "title", "cards"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"const": "content_image"}}},
+                            "then": {"required": ["type", "title", "content"]}
                         },
                         {
                             "if": {"properties": {"type": {"const": "content_3extra"}}},
@@ -142,9 +135,10 @@ Supported slide types:
 - cover
 - agenda
 - section
-- content_2
+- content_2 / content_2_a / content_2_b / content_2_c
 - content_3extra
-- content_4
+- content_image
+- content_4 / content_4_a / content_4_b
 - table
 - flow
 - end
@@ -181,9 +175,10 @@ Slide usage guidance:
 - cover: title / opening page
 - agenda: optional overview
 - section: major topic break, chapter divider, or rhythm change
-- content_2: two grouped ideas, two parallel concepts, or two-column explanation
+- content_2 variants (content_2/content_2_a/content_2_b/content_2_c): two grouped ideas or two-column explanation
 - content_3extra: exactly three grouped ideas or three parallel highlights
-- content_4: four grouped ideas, four capabilities, four categorized points, or four-item summary
+- content_image: one key image with one explanatory text block
+- content_4 variants (content_4/content_4_a/content_4_b): four grouped ideas, four capabilities, or four-item summary
 - table: comparisons, structured facts, grouped responsibilities, categories, tools, or capability summaries
 - flow: process, sequence, collaboration stages, lifecycle, or learning path
 - end: closing slide
@@ -214,11 +209,7 @@ Output valid deck_spec JSON only.
 """
 
 def sanitize_slides(spec: dict) -> dict:
-    allowed = {
-        "cover", "agenda", "section",
-        "content_2", "content_3extra", "content_4",
-        "table", "flow", "end"
-    }
+    allowed = set(SUPPORTED_SLIDE_TYPES)
 
     slides = spec.get("slides", [])
     cleaned = []

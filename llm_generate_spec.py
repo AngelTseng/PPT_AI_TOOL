@@ -3,10 +3,12 @@ from pathlib import Path
 from openai import OpenAI
 
 from config import OPENAI_MODEL
+from slide_registry import SLIDE_REGISTRY
 
 client = OpenAI()
 
 BASE_DIR = Path(__file__).resolve().parent
+SUPPORTED_SLIDE_TYPES = list(SLIDE_REGISTRY.keys())
 TEMPLATE_MAP_PATH = BASE_DIR / "template_map.json"
 
 
@@ -23,25 +25,12 @@ DECK_SPEC_SCHEMA = {
                     "properties": {
                         "type": {
                             "type": "string",
-                            "enum": [
-                                "cover",
-                                "agenda",
-                                "section",
-                                "content_3extra",
-                                "content_2_a",
-                                "content_2_b",
-                                "content_2_c",
-                                "table",
-                                "content_image",
-                                "content_4_a",
-                                "content_4_b",
-                                "flow",
-                                "end",
-                            ]
+                            "enum": SUPPORTED_SLIDE_TYPES
                         },
                         "topic": {"type": "string"},
                         "speaker": {"type": "string"},
                         "title": {"type": "string"},
+                        "content": {"type": "string"},
                         "items": {
                             "type": "array",
                             "items": {"type": "string"},
@@ -94,12 +83,16 @@ DECK_SPEC_SCHEMA = {
                             "then": {"required": ["type", "name"]}
                         },
                         {
-                            "if": {"properties": {"type": {"const": "content_2"}}},
+                            "if": {"properties": {"type": {"enum": ["content_2", "content_2_a", "content_2_b", "content_2_c"]}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
-                            "if": {"properties": {"type": {"const": "content_4"}}},
+                            "if": {"properties": {"type": {"enum": ["content_4", "content_4_a", "content_4_b"]}}},
                             "then": {"required": ["type", "title", "cards"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"const": "content_image"}}},
+                            "then": {"required": ["type", "title", "content"]}
                         },
                         {
                             "if": {"properties": {"type": {"const": "content_3extra"}}},
@@ -164,18 +157,20 @@ Supported slide types:
 - cover
 - agenda
 - section
-- content_2
+- content_2 / content_2_a / content_2_b / content_2_c
 - content_3extra
-- content_4
+- content_image
+- content_4 / content_4_a / content_4_b
 - table
 - flow
 - end
 
 Rules:
 - agenda.items: max 5
-- content_2.cards: max 2
+- content_2/content_2_a/content_2_b/content_2_c.cards: max 2
 - content_3extra.cards: max 3
-- content_4.cards: max 4
+- content_4/content_4_a/content_4_b.cards: max 4
+- content_image requires title + content
 - flow.steps: at least 2
 - table.columns must not be empty
 - table.rows must not be empty
@@ -267,11 +262,7 @@ Use the template structure to choose appropriate slide types and content layout.
 """
 
 def sanitize_slides(spec: dict) -> dict:
-    allowed = {
-        "cover", "agenda", "section",
-        "content_2", "content_3extra", "content_4",
-        "table", "flow", "end"
-    }
+    allowed = set(SUPPORTED_SLIDE_TYPES)
 
     slides = spec.get("slides", [])
     cleaned = []
