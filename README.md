@@ -2,6 +2,12 @@
 
 This tool generates PowerPoint using AI and a template.
 
+Noticefication
+------------
+You can use your own template and setting the placeholder name by your own.
+This is just a simple test tool.
+You should prepare your own OpenAI API key to set the enviornment.
+
 Requirements
 ------------
 1. Windows
