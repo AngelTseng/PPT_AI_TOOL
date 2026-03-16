@@ -11,7 +11,7 @@ def _expand_short_text(text: str, min_chars: int = 28) -> str:
         return ""
     if len(cleaned) >= min_chars:
         return cleaned
-    return f"{cleaned}：補充關鍵背景、做法與預期效益。"
+    return f"{cleaned}：文字過短，需補充關鍵背景、做法與預期效益。"
 
 
 def _normalize_content_image_content(slide: dict) -> str:
@@ -22,9 +22,10 @@ def _normalize_content_image_content(slide: dict) -> str:
 
     title_hint = _clean_text(slide.get("title", ""))
     if title_hint:
-        return f"{title_hint}：自行補充或刪除"
+        return f"{title_hint}：自行補充內容或刪除"
 
-    return "自行補充或刪除"
+    return "自行補充內容或刪除"
+
 
 
 def _normalize_cards(cards, max_cards: int):
