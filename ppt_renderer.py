@@ -8,6 +8,7 @@ SLIDE_RENDERERS = {}
 
 MsoAutoSizeTextToFitShape = 2
 MsoTrue = -1
+MsoFalse = 0
 
 
 def _fit_text_to_shape(shape):
@@ -107,6 +108,57 @@ def _find_template_slide_index_by_shape(src_pres, shape_name: str) -> int | None
             except Exception:
                 continue
     return None
+
+
+
+def _set_wordwrap_and_autosize(shape, no_wrap: bool = False):
+    wrap = MsoFalse if no_wrap else MsoTrue
+    try:
+        shape.TextFrame2.WordWrap = wrap
+        shape.TextFrame2.AutoSize = MsoAutoSizeTextToFitShape
+    except Exception:
+        pass
+    try:
+        shape.TextFrame.WordWrap = bool(not no_wrap)
+    except Exception:
+        pass
+
+
+def _shrink_text_to_fit_shape(shape, min_font_size: float = 10.0):
+    """Reduce font size until text bounds fit inside shape bounds (best effort)."""
+    try:
+        tr2 = shape.TextFrame2.TextRange
+        if tr2.Length <= 0:
+            return
+
+        try:
+            current_size = float(tr2.Font.Size)
+        except Exception:
+            current_size = 18.0
+
+        safety = 40
+        while safety > 0:
+            safety -= 1
+            try:
+                bw = float(tr2.BoundWidth)
+                bh = float(tr2.BoundHeight)
+                w = float(shape.Width)
+                h = float(shape.Height)
+            except Exception:
+                break
+
+            if bw <= w and bh <= h:
+                break
+
+            current_size -= 0.5
+            if current_size < min_font_size:
+                break
+            try:
+                tr2.Font.Size = current_size
+            except Exception:
+                break
+    except Exception:
+        pass
 
 def register_renderer(name):
     def wrapper(func):
@@ -410,7 +462,7 @@ def shape_by_name(slide, name: str):
             return shp
     return None
 
-def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False):
+def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_wrap: bool = False):
     
     shp = shape_by_name(slide, shape_name)
 
@@ -421,8 +473,25 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False):
     if not shp.HasTextFrame:
         return False
 
+    clean_text = "" if text is None else str(text).strip()
+    if clean_text == "":
+        # Requirement: remove unfilled textboxes directly.
+        try:
+            shp.Delete()
+            return True
+        except Exception:
+            try:
+                shp.TextFrame.TextRange.Text = ""
+                return True
+            except Exception:
+                return False
+
     tr = shp.TextFrame.TextRange
-    tr.Text = text
+    tr.Text = clean_text
+
+    _set_wordwrap_and_autosize(shp, no_wrap=no_wrap)
+    _shrink_text_to_fit_shape(shp)
+    _clamp_shape_within_slide(slide, shp)
 
     # Keep text within textbox and avoid visual overflow when content is longer.
     _fit_text_to_shape(shp)
@@ -554,14 +623,14 @@ def detect_slide_text_color(slide):
 
 @register_renderer("cover")
 def render_cover(slide, slide_spec):
-    set_text(slide, "Topic", str(slide_spec.get("topic", "")))
+    set_text(slide, "Topic", str(slide_spec.get("topic", "")), no_wrap=True)
     set_text(slide, "speaker_name", str(slide_spec.get("speaker", "")))
 
 
 @register_renderer("agenda")
 def render_agenda(slide, slide_spec):
 
-    set_text(slide, "outline", slide_spec.get("title", "Agenda"), bold=True)
+    set_text(slide, "outline", slide_spec.get("title", "Agenda"), bold=True, no_wrap=True)
 
     items = slide_spec.get("items", [])
 
@@ -591,7 +660,7 @@ def render_section(slide, slide_spec):
 @register_renderer("content_2")
 def render_content_2(slide, slide_spec):
     if shape_by_name(slide, "title"):
-        set_text(slide, "title", str(slide_spec.get("title", "")))
+        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
 
     cards = slide_spec.get("cards", [])
 
@@ -615,7 +684,7 @@ SLIDE_RENDERERS["content_2_c"] = render_content_2
 @register_renderer("content_4")
 def render_content_4(slide, slide_spec):
     if shape_by_name(slide, "title"):
-        set_text(slide, "title", str(slide_spec.get("title", "")))
+        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
 
     cards = slide_spec.get("cards", [])
 
@@ -637,7 +706,7 @@ SLIDE_RENDERERS["content_4_b"] = render_content_4
 
 @register_renderer("content_3extra")
 def render_content_3extra(slide, slide_spec):
-    set_text(slide, "title", str(slide_spec.get("title", "")))
+    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     cards = slide_spec.get("cards", [])
 
     for i in range(1, 4):
@@ -652,7 +721,7 @@ def render_content_3extra(slide, slide_spec):
 
 @register_renderer("table")
 def render_table_slide(slide, slide_spec):
-    set_text(slide, "title", str(slide_spec.get("title", "")))
+    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     fill_table(
         slide,
         "sheet_1",
@@ -663,7 +732,7 @@ def render_table_slide(slide, slide_spec):
 
 @register_renderer("flow")
 def render_flow(slide, slide_spec):
-    set_text(slide, "title", str(slide_spec.get("title", "")))
+    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     steps = slide_spec.get("steps", [])
 
     prefer_name = _resolve_flow_prefer_name(slide, slide_spec)
@@ -691,7 +760,7 @@ def render_flow(slide, slide_spec):
 @register_renderer("content_image")
 def render_content_image(slide, slide_spec):
     if shape_by_name(slide, "title"):
-        set_text(slide, "title", str(slide_spec.get("title", "")))
+        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     if shape_by_name(slide, "content"):
         set_text(slide, "content", str(slide_spec.get("content", "")))
 

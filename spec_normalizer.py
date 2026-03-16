@@ -5,27 +5,21 @@ def _clean_text(value) -> str:
 
 
 def _expand_short_text(text: str, min_chars: int = 28) -> str:
-    """Pad overly short content with a concise explanatory suffix for readability."""
-    cleaned = _clean_text(text)
-    if not cleaned:
-        return ""
-    if len(cleaned) >= min_chars:
-        return cleaned
-    return f"{cleaned}：文字過短，需補充關鍵背景、做法與預期效益。"
+    """Only clean text; do not auto-append suggestion sentences into PPT content."""
+    return _clean_text(text)
 
 
 def _normalize_content_image_content(slide: dict) -> str:
-    """Ensure content_image always has non-empty content for validator/renderer."""
+    """Ensure content_image keeps non-empty content without adding coaching text."""
     content = _expand_short_text(slide.get("content", ""))
     if content:
         return content
 
     title_hint = _clean_text(slide.get("title", ""))
     if title_hint:
-        return f"{title_hint}：自行補充內容或刪除"
+        return title_hint
 
-    return "自行補充內容或刪除"
-
+    return "N/A"
 
 
 def _normalize_cards(cards, max_cards: int):
@@ -36,19 +30,11 @@ def _normalize_cards(cards, max_cards: int):
             continue
 
         item = _clean_text(card.get("item")) or f"Point {idx}"
-        content = _expand_short_text(card.get("content", "")) or "補充關鍵背景、做法與預期效益。"
+        content = _expand_short_text(card.get("content", ""))
 
         normalized.append({"item": item, "content": content})
         if len(normalized) >= max_cards:
             break
-
-    # Keep card-count aligned with target layout capacity.
-    while len(normalized) < max_cards:
-        idx = len(normalized) + 1
-        normalized.append({
-            "item": f"Point {idx}",
-            "content": "補充關鍵背景、做法與預期效益。"
-        })
 
     return normalized
 
@@ -85,20 +71,35 @@ def _ensure_cover_and_end(slides: list[dict]) -> list[dict]:
 
     return [cover_slide] + body_slides + [end_slide]
 
+
+
+def _pick_content_variant(base_type: str, counter: int) -> str:
+    if base_type == "content_2":
+        variants = ["content_2_a", "content_2_b", "content_2_c"]
+        return variants[counter % len(variants)]
+    if base_type == "content_4":
+        variants = ["content_4_a", "content_4_b"]
+        return variants[counter % len(variants)]
+    return base_type
+
 def normalize_beautified_spec(spec: dict) -> dict:
     slides = spec.get("slides", [])
     normalized = []
 
     content_2_types = {"content_2", "content_2_a", "content_2_b", "content_2_c"}
     content_4_types = {"content_4", "content_4_a", "content_4_b"}
+    content_2_counter = 0
+    content_4_counter = 0
 
     for slide in slides:
         t = slide.get("type")
 
         if t == "content_2":
-            t = "content_2_a"
+            t = _pick_content_variant("content_2", content_2_counter)
+            content_2_counter += 1
         elif t == "content_4":
-            t = "content_4_a"
+            t = _pick_content_variant("content_4", content_4_counter)
+            content_4_counter += 1
 
         if t == "cover":
             normalized.append({
