@@ -254,8 +254,103 @@
   {
     "slide_index": 5,
     "layout": "3_EXTRA",
-    "detected_type": "content_2",
+    "detected_type": "content_3extra",
     "shapes": [
+      {
+        "name": "矩形: 圓角 5",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "矩形: 圓角 7",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "矩形: 圓角 4",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "item_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 6,
+    "layout": "3_EXTRA",
+    "detected_type": "content_2_a",
+    "shapes": [
+      {
+        "name": "矩形: 剪去單一角落 3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
       {
         "name": "img_2",
         "is_placeholder": false,
@@ -271,14 +366,6 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "PICTURE (13)"
-      },
-      {
-        "name": "矩形: 剪去同側角落 1",
-        "is_placeholder": false,
-        "has_text": true,
-        "has_table": false,
-        "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
       },
       {
         "name": "title",
@@ -303,13 +390,29 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "title_content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "title_content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
       }
     ]
   },
   {
-    "slide_index": 6,
+    "slide_index": 7,
     "layout": "3_EXTRA",
-    "detected_type": "content_2",
+    "detected_type": "unknown",
     "shapes": [
       {
         "name": "直角三角形 3",
@@ -336,25 +439,25 @@
         "shape_type": "TEXT_BOX (17)"
       },
       {
-        "name": "img_1",
+        "name": "title_content_1",
         "is_placeholder": false,
-        "has_text": false,
+        "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "TEXT_BOX (17)"
       },
       {
-        "name": "img_2",
+        "name": "title_content_2",
         "is_placeholder": false,
-        "has_text": false,
+        "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "TEXT_BOX (17)"
       }
     ]
   },
   {
-    "slide_index": 7,
+    "slide_index": 8,
     "layout": "3_EXTRA",
     "detected_type": "table",
     "shapes": [
@@ -385,9 +488,9 @@
     ]
   },
   {
-    "slide_index": 8,
+    "slide_index": 9,
     "layout": "3_EXTRA",
-    "detected_type": "unknown",
+    "detected_type": "content_image",
     "shapes": [
       {
         "name": "矩形: 剪去同側角落 5",
@@ -424,18 +527,10 @@
     ]
   },
   {
-    "slide_index": 9,
+    "slide_index": 10,
     "layout": "3_EXTRA",
-    "detected_type": "content_2",
+    "detected_type": "unknown",
     "shapes": [
-      {
-        "name": "圖片 7",
-        "is_placeholder": false,
-        "has_text": false,
-        "has_table": false,
-        "has_chart": false,
-        "shape_type": "PICTURE (13)"
-      },
       {
         "name": "圖片 9",
         "is_placeholder": false,
@@ -444,6 +539,37 @@
         "has_chart": false,
         "shape_type": "PICTURE (13)"
       },
+      {
+        "name": "矩形 2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "content",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      }
+    ]
+  },
+  {
+    "slide_index": 11,
+    "layout": "3_EXTRA",
+    "detected_type": "content_2_c",
+    "shapes": [
       {
         "name": "矩形 11",
         "is_placeholder": false,
@@ -495,9 +621,9 @@
     ]
   },
   {
-    "slide_index": 10,
+    "slide_index": 12,
     "layout": "3_EXTRA",
-    "detected_type": "content_4",
+    "detected_type": "content_4_a",
     "shapes": [
       {
         "name": "直線接點 12",
@@ -564,14 +690,6 @@
         "shape_type": "TEXT_BOX (17)"
       },
       {
-        "name": "圖片 27",
-        "is_placeholder": false,
-        "has_text": false,
-        "has_table": false,
-        "has_chart": false,
-        "shape_type": "PICTURE (13)"
-      },
-      {
         "name": "title",
         "is_placeholder": false,
         "has_text": true,
@@ -582,9 +700,9 @@
     ]
   },
   {
-    "slide_index": 11,
+    "slide_index": 13,
     "layout": "3_EXTRA",
-    "detected_type": "content_4",
+    "detected_type": "content_4_b",
     "shapes": [
       {
         "name": "矩形 11",
@@ -669,7 +787,7 @@
     ]
   },
   {
-    "slide_index": 12,
+    "slide_index": 14,
     "layout": "3_EXTRA",
     "detected_type": "flow",
     "shapes": [
@@ -700,7 +818,69 @@
     ]
   },
   {
-    "slide_index": 13,
+    "slide_index": 15,
+    "layout": "3_EXTRA",
+    "detected_type": "unknown",
+    "shapes": [
+      {
+        "name": "矩形: 剪去同側角落 1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "flow_chart_2",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "None"
+      }
+    ]
+  },
+  {
+    "slide_index": 16,
+    "layout": "3_EXTRA",
+    "detected_type": "unknown",
+    "shapes": [
+      {
+        "name": "矩形: 剪去同側角落 1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "AUTO_SHAPE (1)"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)"
+      },
+      {
+        "name": "flow_chart_3",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "None"
+      }
+    ]
+  },
+  {
+    "slide_index": 17,
     "layout": "1_標題投影片",
     "detected_type": "end",
     "shapes": [
