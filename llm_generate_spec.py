@@ -203,12 +203,21 @@ Slide usage guidance:
 - Use table for comparisons, specifications, structured facts, grouped responsibilities, categories, or tool/capability summaries.
 - Use flow for processes, sequences, collaboration stages, development lifecycle, or learning paths.
 - Use section to break major topics and improve presentation rhythm.
+- Use content_image for one key visual + one concise explanation.
+- If a slide has only one core idea/content block, prefer content_image as the one-content slide (do not force into content_2/content_3extra/content_4).
+
+Content quality rules:
+- section.name must always be non-empty and explicit.
+- For content cards, avoid single short phrases; each content should be 1 concise sentence (about 18-40 chars in Chinese or 8-20 words in English).
+- For content_image.content, write at least one complete concise sentence (about 24+ chars in Chinese or 12+ words in English).
+- For flow.steps, each step should be descriptive (not just 1-2 words).
 
 Layout adaptation rules:
 - If content naturally fits 2 grouped ideas, prefer content_2 instead of forcing it into content_3extra.
 - If content naturally fits 4 grouped ideas, prefer content_4 or table instead of forcing it into content_3extra.
 - Only use content_3extra when the content truly fits a 3-point grouped layout.
 - If a slide looks like a chapter heading or transition, use section.
+- If a slide has a single key message with one supporting paragraph, prefer content_image over multi-card layouts.
 - If content is too long for one slide, split it into multiple slides when needed.
 
 Section coverage rules:

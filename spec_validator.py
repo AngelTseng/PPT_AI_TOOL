@@ -2,9 +2,15 @@ from slide_registry import SLIDE_REGISTRY
 
 SUPPORTED_TYPES = set(SLIDE_REGISTRY.keys())
 
-CONTENT_2_TYPES = {"content_2", "content_2_a", "content_2_b", "content_2_c"}
-CONTENT_4_TYPES = {"content_4", "content_4_a", "content_4_b"}
+CONTENT_2_TYPES = {"content_2_a", "content_2_b", "content_2_c"}
+CONTENT_4_TYPES = {"content_4_a", "content_4_b"}
 CONTENT_TYPES = CONTENT_2_TYPES | CONTENT_4_TYPES | {"content_3extra", "content_image", "table", "flow"}
+
+
+def _text_len(value) -> int:
+    if value is None:
+        return 0
+    return len(str(value).strip())
 
 
 def check_slide_diversity(spec: dict):
@@ -97,6 +103,12 @@ def validate_deck_spec(spec: dict):
                 errors.append(f"slides[{i}].cards must be list")
             elif len(cards) > 2:
                 warnings.append(f"slides[{i}].cards >2 , extra ignored")
+            elif len(cards) < 2:
+                warnings.append(f"slides[{i}].cards <2 , layout may look incomplete")
+
+            for c_idx, card in enumerate(cards, start=1):
+                if _text_len(card.get("content", "")) < 16:
+                    warnings.append(f"slides[{i}].cards[{c_idx}].content is very short")
 
         elif t == "content_3extra":
             cards = slide.get("cards", [])
@@ -104,6 +116,12 @@ def validate_deck_spec(spec: dict):
                 errors.append(f"slides[{i}].cards must be list")
             elif len(cards) > 3:
                 warnings.append(f"slides[{i}].cards >3 , extra ignored")
+            elif len(cards) < 3:
+                warnings.append(f"slides[{i}].cards <3 , layout may look incomplete")
+
+            for c_idx, card in enumerate(cards, start=1):
+                if _text_len(card.get("content", "")) < 16:
+                    warnings.append(f"slides[{i}].cards[{c_idx}].content is very short")
 
         elif t in CONTENT_4_TYPES:
             cards = slide.get("cards", [])
@@ -111,17 +129,29 @@ def validate_deck_spec(spec: dict):
                 errors.append(f"slides[{i}].cards must be list")
             elif len(cards) > 4:
                 warnings.append(f"slides[{i}].cards >4 , extra ignored")
+            elif len(cards) < 4:
+                warnings.append(f"slides[{i}].cards <4 , layout may look incomplete")
+
+            for c_idx, card in enumerate(cards, start=1):
+                if _text_len(card.get("content", "")) < 16:
+                    warnings.append(f"slides[{i}].cards[{c_idx}].content is very short")
 
         elif t == "content_image":
             if not slide.get("title"):
                 errors.append(f"slides[{i}].title is required")
             if not slide.get("content"):
                 errors.append(f"slides[{i}].content is required")
+            elif _text_len(slide.get("content")) < 20:
+                warnings.append(f"slides[{i}].content is very short")
 
         elif t == "flow":
             steps = slide.get("steps", [])
             if not isinstance(steps, list) or len(steps) < 2:
                 errors.append(f"slides[{i}].steps must have >=2")
+            else:
+                for s_idx, step in enumerate(steps, start=1):
+                    if _text_len(step) < 8:
+                        warnings.append(f"slides[{i}].steps[{s_idx}] is very short")
 
         elif t == "table":
             columns = slide.get("columns", [])
@@ -130,6 +160,7 @@ def validate_deck_spec(spec: dict):
                 errors.append(f"slides[{i}].columns invalid")
             if not isinstance(rows, list) or not rows:
                 errors.append(f"slides[{i}].rows invalid")
+
 
     warnings.extend(check_slide_diversity(spec))
     warnings.extend(check_agenda_coverage(spec))

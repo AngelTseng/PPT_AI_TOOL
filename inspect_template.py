@@ -12,8 +12,20 @@ if not TEMPLATE.exists():
 prs = Presentation(str(TEMPLATE))
 data = []
 
+
+def _normalize_shape_names(shape_names: set[str]) -> set[str]:
+    return {str(n).strip().lower() for n in shape_names if str(n).strip()}
+
+
 def detect_template_type(shape_names: set, shapes: list, slide_index: int, total_slides: int) -> str:
-    has = lambda n: n in shape_names
+    names = _normalize_shape_names(shape_names)
+
+    def has(name: str) -> bool:
+        return name.strip().lower() in names
+
+    def has_img(prefix: str = "img") -> bool:
+        prefix = prefix.lower()
+        return any(n == prefix or n.startswith(f"{prefix}_") for n in names)
 
     # cover
     if has("Topic") and has("speaker_name"):
@@ -27,21 +39,17 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
     if has("agenda_name"):
         return "section"
 
-    # flow
-    if has("flow_chart_1"):
+    # flow (support three variants)
+    if has("flow_chart_1") or has("flow_chart_2") or has("flow_chart_3"):
         return "flow"
 
     # table
     for shp in shapes:
-        if shp["name"] == "sheet_1" and shp["has_table"]:
+        if str(shp.get("name", "")).strip().lower() == "sheet_1" and shp.get("has_table"):
             return "table"
 
-    # end
-    if slide_index == total_slides:
-        return "end"
-
-    # content_image
-    if has("title") and has("content") and has("img"):
+    # content_image (more tolerant for img naming)
+    if has("title") and has("content") and has_img("img"):
         return "content_image"
 
     # content_4 variants
@@ -64,7 +72,12 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
     if has("content_1") and has("content_2") and has("img_1") and has("img_2"):
         return "content_2_b"
 
+    # end (fallback to last slide if no better match)
+    if slide_index == total_slides:
+        return "end"
+
     return "unknown"
+
 
 for i, slide in enumerate(prs.slides, start=1):
     shapes = []
