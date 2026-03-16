@@ -84,13 +84,21 @@ BEAUTIFY_SCHEMA = {
                             "then": {"required": ["type", "name"]}
                         },
                         {
-                         "if": {"properties": {"type": {"enum": ["content_2", "content_2_a", "content_2_b", "content_2_c"]}}},
+                            "if": {"properties": {"type": {"enum": ["content_2", "content_2_a"]}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
-                            "if": {"properties": {"type": {"enum": ["content_4", "content_4_a", "content_4_b"]}}},
+                            "if": {"properties": {"type": {"enum": ["content_2_b", "content_2_c"]}}},
+                            "then": {"required": ["type", "cards"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"enum": ["content_4", "content_4_a"]}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
+                        {
+                            "if": {"properties": {"type": {"enum": ["content_4_b"]}}},
+                            "then": {"required": ["type", "cards"]}
+},
                         {
                             "if": {"properties": {"type": {"const": "content_image"}}},
                             "then": {"required": ["type", "title", "content"]}
@@ -164,6 +172,14 @@ Agenda rules:
 - Agenda is optional.
 - If agenda is included, keep it concise.
 - If agenda is included, each agenda item should correspond to at least one explanatory slide.
+
+Hard layout rules:
+- content_3extra must always contain exactly 3 cards.
+- content_4/content_4_a/content_4_b must always contain exactly 4 cards.
+- Do not use the same content_3 variant for all 3-card slides.
+- Do not use the same content_4 variant for all 4-card slides.
+- When the deck contains 2 or more 3-card slides, use at least 2 different 3-card layout variants.
+- When the deck contains 2 or more 4-card slides, use at least 2 different 4-card layout variants.
 
 Section coverage rules:
 - Every section slide must be immediately followed by at least one explanatory content slide.

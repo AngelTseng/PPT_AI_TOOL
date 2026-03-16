@@ -1,4 +1,5 @@
 import os
+import time
 import shutil
 import win32com.client as win32
 from slide_registry import FLOW_TEMPLATE_INDEX, SLIDE_REGISTRY
@@ -123,9 +124,7 @@ def _set_wordwrap_and_autosize(shape, no_wrap: bool = False):
     except Exception:
         pass
 
-
-def _shrink_text_to_fit_shape(shape, min_font_size: float = 10.0):
-    """Reduce font size until text bounds fit inside shape bounds (best effort)."""
+def _shrink_text_to_fit_shape(shape, min_font_size: float = 10.0, single_line: bool = False):
     try:
         tr2 = shape.TextFrame2.TextRange
         if tr2.Length <= 0:
@@ -136,9 +135,10 @@ def _shrink_text_to_fit_shape(shape, min_font_size: float = 10.0):
         except Exception:
             current_size = 18.0
 
-        safety = 40
+        safety = 60
         while safety > 0:
             safety -= 1
+
             try:
                 bw = float(tr2.BoundWidth)
                 bh = float(tr2.BoundHeight)
@@ -147,12 +147,22 @@ def _shrink_text_to_fit_shape(shape, min_font_size: float = 10.0):
             except Exception:
                 break
 
-            if bw <= w and bh <= h:
+            fits = bw <= w and bh <= h
+
+            if single_line:
+                try:
+                    line_count = tr2.Lines().Count
+                except Exception:
+                    line_count = 1
+                fits = fits and line_count <= 1
+
+            if fits:
                 break
 
             current_size -= 0.5
             if current_size < min_font_size:
                 break
+
             try:
                 tr2.Font.Size = current_size
             except Exception:
@@ -462,7 +472,7 @@ def shape_by_name(slide, name: str):
             return shp
     return None
 
-def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_wrap: bool = False):
+def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_wrap: bool = False, ingle_line: bool = False,):
     
     shp = shape_by_name(slide, shape_name)
 
@@ -496,6 +506,10 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
     # Keep text within textbox and avoid visual overflow when content is longer.
     _fit_text_to_shape(shp)
     _clamp_shape_within_slide(slide, shp)
+    
+    _fit_text_to_shape(shp)
+    _resolve_overlap_or_fit(slide, shp)
+    _clamp_shape_within_slide(slide, shp)
 
     if bold is not None:
         try:
@@ -512,13 +526,90 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
 
     return True
 
-def delete_textboxes_except(slide, keep_names: set[str]):
+CONTENT_CLEANUP_NAMES = {
+    "content_image": {"title", "title_content", "item", "content"},
+    "content_text": {"title", "title_content", "item", "content"},
+
+    "content_2_a": {"title", "title_content_1", "title_content_2", "item_1", "item_2", "content_1", "content_2"},
+    "content_2_b": {"title_content_1", "title_content_2", "item_1", "item_2", "content_1", "content_2"},
+    "content_2_c": {"item_1", "item_2", "content_1", "content_2"},
+
+    "content_3extra": {"title", "item_1", "item_2", "item_3", "content_1", "content_2", "content_3"},
+    "content_3extra_image": {"title", "item_1", "item_2", "item_3", "content_1", "content_2", "content_3"},
+
+    "content_4_a": {"title", "title_content_1", "title_content_2", "title_content_3", "title_content_4", "item_1", "item_2", "item_3", "item_4", "content_1", "content_2", "content_3", "content_4"},
+    "content_4_b": {"title_content_1", "title_content_2", "title_content_3", "title_content_4", "item_1", "item_2", "item_3", "item_4", "content_1", "content_2", "content_3", "content_4"},
+}
+
+def _rect(shape):
+    return (
+        float(shape.Left),
+        float(shape.Top),
+        float(shape.Left + shape.Width),
+        float(shape.Top + shape.Height),
+    )
+
+def _intersects(a, b) -> bool:
+    l1, t1, r1, b1 = a
+    l2, t2, r2, b2 = b
+    return not (r1 <= l2 or r2 <= l1 or b1 <= t2 or b2 <= t1)
+
+def _find_overlaps(slide, shape):
+    overlaps = []
+    target = _rect(shape)
+
+    for i in range(1, slide.Shapes.Count + 1):
+        other = slide.Shapes(i)
+        if other.Name == shape.Name:
+            continue
+        try:
+            if _intersects(target, _rect(other)):
+                overlaps.append(other)
+        except Exception:
+            pass
+    return overlaps
+
+def _resolve_overlap_or_fit(slide, shape, max_expand: float = 80.0):
+    # 先左右擴張
+    step = 6.0
+    expanded = 0.0
+
+    while expanded < max_expand:
+        overlaps = _find_overlaps(slide, shape)
+        if not overlaps:
+            return
+
+        moved = False
+        try:
+            if shape.Left > step:
+                shape.Left -= step / 2
+                shape.Width += step
+                moved = True
+        except Exception:
+            pass
+
+        if not moved:
+            break
+
+        expanded += step
+
+    # 再縮字
+    _shrink_text_to_fit_shape(shape)
+
+def delete_unupdated_content_shapes(slide, slide_type: str, keep_names: set[str]):
+    deletable_names = CONTENT_CLEANUP_NAMES.get(slide_type, set())
+    if not deletable_names:
+        return
+
     for i in range(slide.Shapes.Count, 0, -1):
         shp = slide.Shapes(i)
 
         try:
             name = str(shp.Name)
         except Exception:
+            continue
+
+        if name not in deletable_names:
             continue
 
         if name in keep_names:
@@ -546,13 +637,35 @@ def delete_textboxes_except(slide, keep_names: set[str]):
             except Exception:
                 pass
 
-def duplicate_to_presentation(src_slide, dst_pres):
+def duplicate_to_presentation(src_slide, dst_pres, max_retries: int = 10):
     """
-    Copy a slide into another presentation, keeping design as much as possible.
+    Robust slide copy/paste across presentations.
     """
-    src_slide.Copy()
-    dst_pres.Slides.Paste(dst_pres.Slides.Count + 1)
-    return dst_pres.Slides(dst_pres.Slides.Count)
+    last_err = None
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            src_slide.Copy()
+            pythoncom.PumpWaitingMessages()
+            time.sleep(0.2 * attempt)
+
+            paste_result = dst_pres.Slides.Paste(dst_pres.Slides.Count + 1)
+            pythoncom.PumpWaitingMessages()
+            time.sleep(0.1)
+
+            try:
+                # SlideRange -> first pasted slide
+                return paste_result.Item(1)
+            except Exception:
+                return dst_pres.Slides(dst_pres.Slides.Count)
+
+        except Exception as e:
+            last_err = e
+            print(f"[WARN] Paste failed attempt {attempt}/{max_retries}: {e}")
+            pythoncom.PumpWaitingMessages()
+            time.sleep(0.3 * attempt)
+
+    raise RuntimeError(f"Failed to paste slide after {max_retries} retries: {last_err}")
 
 def delete_all_slides(pres):
     # 從後面刪，最安全
@@ -681,8 +794,8 @@ def render_section(slide, slide_spec):
 
     return keep_names
 
-@register_renderer("content_2")
-def render_content_2(slide, slide_spec):
+@register_renderer("content_2_a")
+def render_content_2_a(slide, slide_spec):
     keep_names = set()
 
     if shape_by_name(slide, "title"):
@@ -692,34 +805,77 @@ def render_content_2(slide, slide_spec):
     cards = slide_spec.get("cards", [])
 
     for i in range(1, 3):
+        title_content_name = f"title_content_{i}"
         item_name = f"item_{i}"
         content_name = f"content_{i}"
 
-        if shape_by_name(slide, item_name):
+        card = cards[i - 1] if i <= len(cards) else {}
+        item_text = str(card.get("item", ""))
+        content_text = str(card.get("content", ""))
+
+        if shape_by_name(slide, title_content_name):
+            keep_names.add(title_content_name)
+            set_text(slide, title_content_name, item_text)
+        elif shape_by_name(slide, item_name):
             keep_names.add(item_name)
+            set_text(slide, item_name, item_text)
+
         if shape_by_name(slide, content_name):
             keep_names.add(content_name)
-
-        if i <= len(cards):
-            card = cards[i - 1]
-            if shape_by_name(slide, item_name):
-                set_text(slide, item_name, str(card.get("item", "")))
-            if shape_by_name(slide, content_name):
-                set_text(slide, content_name, str(card.get("content", "")))
-        else:
-            if shape_by_name(slide, item_name):
-                set_text(slide, item_name, "")
-            if shape_by_name(slide, content_name):
-                set_text(slide, content_name, "")
+            set_text(slide, content_name, content_text)
 
     return keep_names
-                
-SLIDE_RENDERERS["content_2_a"] = render_content_2
-SLIDE_RENDERERS["content_2_b"] = render_content_2
-SLIDE_RENDERERS["content_2_c"] = render_content_2
 
-@register_renderer("content_4")
-def render_content_4(slide, slide_spec):
+@register_renderer("content_2_b")
+def render_content_2_b(slide, slide_spec):
+    keep_names = set()
+    cards = slide_spec.get("cards", [])
+
+    for i in range(1, 3):
+        title_content_name = f"title_content_{i}"
+        item_name = f"item_{i}"
+        content_name = f"content_{i}"
+
+        card = cards[i - 1] if i <= len(cards) else {}
+        item_text = str(card.get("item", ""))
+        content_text = str(card.get("content", ""))
+
+        if shape_by_name(slide, title_content_name):
+            keep_names.add(title_content_name)
+            set_text(slide, title_content_name, item_text)
+        elif shape_by_name(slide, item_name):
+            keep_names.add(item_name)
+            set_text(slide, item_name, item_text)
+
+        if shape_by_name(slide, content_name):
+            keep_names.add(content_name)
+            set_text(slide, content_name, content_text)
+
+    return keep_names
+             
+@register_renderer("content_2_c")
+def render_content_2_c(slide, slide_spec):
+    keep_names = set()
+    cards = slide_spec.get("cards", [])
+
+    for i in range(1, 3):
+        item_name = f"item_{i}"
+        content_name = f"content_{i}"
+
+        card = cards[i - 1] if i <= len(cards) else {}
+
+        if shape_by_name(slide, item_name):
+            keep_names.add(item_name)
+            set_text(slide, item_name, str(card.get("item", "")))
+
+        if shape_by_name(slide, content_name):
+            keep_names.add(content_name)
+            set_text(slide, content_name, str(card.get("content", "")))
+
+    return keep_names
+             
+@register_renderer("content_4_a")
+def render_content_4_a(slide, slide_spec):
     keep_names = set()
 
     if shape_by_name(slide, "title"):
@@ -731,28 +887,45 @@ def render_content_4(slide, slide_spec):
     for i in range(1, 5):
         item_name = f"item_{i}"
         content_name = f"content_{i}"
+        title_content_name = f"title_content_{i}"
+        card = cards[i - 1] if i <= len(cards) else {}
 
-        if shape_by_name(slide, item_name):
+        if shape_by_name(slide, title_content_name):
+            keep_names.add(title_content_name)
+            set_text(slide, title_content_name, str(card.get("item", "")))
+        elif shape_by_name(slide, item_name):
             keep_names.add(item_name)
+            set_text(slide, item_name, str(card.get("item", "")))
+
         if shape_by_name(slide, content_name):
             keep_names.add(content_name)
-
-        if i <= len(cards):
-            card = cards[i - 1]
-            if shape_by_name(slide, item_name):
-                set_text(slide, item_name, str(card.get("item", "")))
-            if shape_by_name(slide, content_name):
-                set_text(slide, content_name, str(card.get("content", "")))
-        else:
-            if shape_by_name(slide, item_name):
-                set_text(slide, item_name, "")
-            if shape_by_name(slide, content_name):
-                set_text(slide, content_name, "")
+            set_text(slide, content_name, str(card.get("content", "")))
 
     return keep_names
                 
-SLIDE_RENDERERS["content_4_a"] = render_content_4
-SLIDE_RENDERERS["content_4_b"] = render_content_4
+@register_renderer("content_4_b")
+def render_content_4_b(slide, slide_spec):
+    keep_names = set()
+    cards = slide_spec.get("cards", [])
+
+    for i in range(1, 5):
+        item_name = f"item_{i}"
+        content_name = f"content_{i}"
+        title_content_name = f"title_content_{i}"
+        card = cards[i - 1] if i <= len(cards) else {}
+
+        if shape_by_name(slide, title_content_name):
+            keep_names.add(title_content_name)
+            set_text(slide, title_content_name, str(card.get("item", "")))
+        elif shape_by_name(slide, item_name):
+            keep_names.add(item_name)
+            set_text(slide, item_name, str(card.get("item", "")))
+
+        if shape_by_name(slide, content_name):
+            keep_names.add(content_name)
+            set_text(slide, content_name, str(card.get("content", "")))
+
+    return keep_names
 
 @register_renderer("content_3extra")
 def render_content_3extra(slide, slide_spec):
@@ -840,12 +1013,13 @@ def render_content_image(slide, slide_spec):
 
     return keep_names
 
+SLIDE_RENDERERS["content_text"] = render_content_image
+
 @register_renderer("end")
 def render_end(slide, slide_spec):
     return set()
 
 SLIDE_RENDERERS["content_3extra_image"] = render_content_3extra
-SLIDE_RENDERERS["content_text"] = render_content_image
 
 def render_slide(slide, slide_spec):
     t = slide_spec.get("type")
@@ -856,7 +1030,7 @@ def render_slide(slide, slide_spec):
         return
 
     keep_names = fn(slide, slide_spec) or set()
-    delete_textboxes_except(slide, keep_names)
+    delete_unupdated_content_shapes(slide, t, keep_names)
 
 def get_template_slide_index(slide_type, src_pres, slide_spec=None):
     if slide_type == "flow":

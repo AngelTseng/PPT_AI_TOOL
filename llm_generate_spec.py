@@ -83,12 +83,20 @@ DECK_SPEC_SCHEMA = {
                             "then": {"required": ["type", "name"]}
                         },
                         {
-                            "if": {"properties": {"type": {"enum": ["content_2", "content_2_a", "content_2_b", "content_2_c"]}}},
+                            "if": {"properties": {"type": {"enum": ["content_2", "content_2_a"]}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
-                            "if": {"properties": {"type": {"enum": ["content_4", "content_4_a", "content_4_b"]}}},
+                            "if": {"properties": {"type": {"enum": ["content_2_b", "content_2_c"]}}},
+                            "then": {"required": ["type", "cards"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"enum": ["content_4", "content_4_a"]}}},
                             "then": {"required": ["type", "title", "cards"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"enum": ["content_4_b"]}}},
+                            "then": {"required": ["type", "cards"]}
                         },
                         {
                             "if": {"properties": {"type": {"const": "content_image"}}},

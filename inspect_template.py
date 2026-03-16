@@ -28,7 +28,7 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
         return any(n == prefix or n.startswith(f"{prefix}_") for n in names)
 
     # cover
-    if has("Topic") and has("speaker_name"):
+    if has("topic") and has("speaker_name"):
         return "cover"
 
     # agenda
@@ -39,18 +39,26 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
     if has("agenda_name"):
         return "section"
 
-    # flow (support three variants)
+    # flow
     if has("flow_chart_1") or has("flow_chart_2") or has("flow_chart_3"):
         return "flow"
+
+    # end
+    if slide_index == total_slides:
+        return "end"
 
     # table
     for shp in shapes:
         if str(shp.get("name", "")).strip().lower() == "sheet_1" and shp.get("has_table"):
             return "table"
 
-    # content_image (more tolerant for img naming)
+    # content_image
     if has("title") and has("content") and has_img("img"):
         return "content_image"
+
+    # content_text
+    if has("title") and has("content") and not has_img("img"):
+        return "content_text"
 
     # content_4 variants
     if has("content_1") and has("content_2") and has("content_3") and has("content_4"):
@@ -58,26 +66,49 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
             return "content_4_b"
         return "content_4_a"
 
-    # content_3extra
-    if has("item_1") and has("item_2") and has("item_3") and has("content_1") and has("content_2") and has("content_3"):
+    # content_3extra variants
+    if (
+        has("item_1") and has("item_2") and has("item_3")
+        and has("content_1") and has("content_2") and has("content_3")
+    ):
+        if has_img("img"):
+            return "content_3extra_image"
         return "content_3extra"
+    
+    if has("title") and has("content") and has_img("img"):
+        return "content_image"
 
-    # content_2 variants
-    if has("item_1") and has("item_2") and has("content_1") and has("content_2") and not has("item_3") and not has("content_3"):
+    if has("title") and has("content") and not has_img("img"):
+        return "content_text"
+
+    # content_2_c
+    if (
+        has("item_1") and has("item_2")
+        and has("content_1") and has("content_2")
+        and not has("item_3") and not has("content_3")
+    ):
         return "content_2_c"
 
-    if has("title") and has("content_1") and has("content_2") and has("img_1") and has("img_2"):
+    # content_2_a
+    if (
+        has("title")
+        and has("content_1") and has("content_2")
+        and has("img_1") and has("img_2")
+        and (has("title_content_1") or has("item_1"))
+        and (has("title_content_2") or has("item_2"))
+    ):
         return "content_2_a"
 
-    if has("content_1") and has("content_2") and has("img_1") and has("img_2"):
+    # content_2_b
+    if (
+        has("content_1") and has("content_2")
+        and has("img_1") and has("img_2")
+        and (has("title_content_1") or has("item_1"))
+        and (has("title_content_2") or has("item_2"))
+    ):
         return "content_2_b"
 
-    # end (fallback to last slide if no better match)
-    if slide_index == total_slides:
-        return "end"
-
     return "unknown"
-
 
 for i, slide in enumerate(prs.slides, start=1):
     shapes = []

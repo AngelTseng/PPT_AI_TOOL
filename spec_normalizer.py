@@ -82,6 +82,10 @@ def _pick_content_variant(base_type: str, counter: int) -> str:
         return variants[counter % len(variants)]
     return base_type
 
+def _pick_content_3_variant(counter: int) -> str:
+    variants = ["content_3extra", "content_3extra_image"]
+    return variants[counter % len(variants)]
+
 def normalize_beautified_spec(spec: dict) -> dict:
     slides = spec.get("slides", [])
     normalized = []
@@ -139,6 +143,10 @@ def normalize_beautified_spec(spec: dict) -> dict:
                 "title": _clean_text(slide.get("title", "")) or "重點整理",
                 "cards": _normalize_cards(cards, 3)
             })
+
+        elif t == "content_3extra":
+            t = _pick_content_3_variant(content_3_counter)
+            content_3_counter += 1
 
         elif t in content_4_types:
             cards = slide.get("cards")

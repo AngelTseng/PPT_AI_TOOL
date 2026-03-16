@@ -74,14 +74,14 @@ SLIDE_REGISTRY = {
 
     "content_2_b": {
         "template_slide_index": 7,
-        "required_fields": ["title", "cards"],
+        "required_fields": ["cards"],
         "max_cards": 2,
         "description": "Two card slide variant B."
     },
 
     "content_2_c": {
         "template_slide_index": 11,
-        "required_fields": ["title", "cards"],
+        "required_fields": ["cards"],
         "max_cards": 2,
         "description": "Two card slide variant C."
     },
@@ -126,7 +126,7 @@ SLIDE_REGISTRY = {
 
     "content_4_b": {
         "template_slide_index": 13,
-        "required_fields": ["title", "cards"],
+        "required_fields": ["cards"],
         "max_cards": 4,
         "description": "Four card slide variant B."
     },
