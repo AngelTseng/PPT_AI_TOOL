@@ -3,6 +3,7 @@
     "slide_index": 1,
     "layout": "Custom Layout",
     "detected_type": "cover",
+    "shape_count": 4,
     "shapes": [
       {
         "name": "Topic",
@@ -10,7 +11,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Weekly report 1/26-1/30"
       },
       {
         "name": "speaker_name",
@@ -18,7 +20,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Angel10_tseng"
       },
       {
         "name": "Straight Connector 18",
@@ -26,7 +29,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "LINE (9)"
+        "shape_type": "LINE (9)",
+        "text_preview": ""
       },
       {
         "name": "圖片 1",
@@ -34,7 +38,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       }
     ]
   },
@@ -42,6 +47,7 @@
     "slide_index": 2,
     "layout": "4_EXTRA",
     "detected_type": "agenda",
+    "shape_count": 12,
     "shapes": [
       {
         "name": "outline",
@@ -49,7 +55,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Agenda"
       },
       {
         "name": "agenda_2",
@@ -57,7 +64,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "各項事務SOP 公司版"
       },
       {
         "name": "agenda_3",
@@ -65,7 +73,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Keep learning Basic electronic"
       },
       {
         "name": "Straight Connector 5",
@@ -73,7 +82,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "LINE (9)"
+        "shape_type": "LINE (9)",
+        "text_preview": ""
       },
       {
         "name": "Oval 14",
@@ -81,7 +91,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "Oval 16",
@@ -89,7 +100,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "Oval 17",
@@ -97,7 +109,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "Oval 18",
@@ -105,7 +118,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "Oval 14",
@@ -113,7 +127,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "agenda_1",
@@ -121,7 +136,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "PR/PO 流程, Susan交辦事項, Ben 交辦事項"
       },
       {
         "name": "agenda_4",
@@ -129,7 +145,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Weekly global news summary"
       },
       {
         "name": "agenda_5",
@@ -137,7 +154,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Generate PPT by AI tools"
       }
     ]
   },
@@ -145,6 +163,7 @@
     "slide_index": 3,
     "layout": "ALTERNATE DARK BG",
     "detected_type": "section",
+    "shape_count": 1,
     "shapes": [
       {
         "name": "agenda_name",
@@ -152,14 +171,16 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What is inside a PCB"
       }
     ]
   },
   {
     "slide_index": 4,
     "layout": "3_EXTRA",
-    "detected_type": "content_3extra",
+    "detected_type": "content_3extra_image",
+    "shape_count": 11,
     "shapes": [
       {
         "name": "content_1",
@@ -167,7 +188,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What it does:\nLimits current\nDrops voltage\nProtects components\n\n*Without a resistor, many components would burn."
       },
       {
         "name": "item_1",
@@ -175,7 +197,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Resistor"
       },
       {
         "name": "item_2",
@@ -183,7 +206,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Capacitor"
       },
       {
         "name": "content_3",
@@ -191,7 +215,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What it does:\nLights up when current flows in one direction\n\nImportant rules:\nHas polarity (+ and −)\nAlways needs a resi"
       },
       {
         "name": "item_3",
@@ -199,7 +224,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "LED Light Emitting Diode"
       },
       {
         "name": "title",
@@ -207,7 +233,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "The 3 most common components"
       },
       {
         "name": "Straight Connector 13",
@@ -215,7 +242,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "LINE (9)"
+        "shape_type": "LINE (9)",
+        "text_preview": ""
       },
       {
         "name": "content_2",
@@ -223,7 +251,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What it does:\nStores a small amount of charge\nSmooths voltage\nBlocks DC, passes AC (for now: “filters noise”)\n\n*A shock "
       },
       {
         "name": "img_1",
@@ -231,7 +260,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       },
       {
         "name": "img_2",
@@ -239,7 +269,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       },
       {
         "name": "img_3",
@@ -247,7 +278,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       }
     ]
   },
@@ -255,6 +287,7 @@
     "slide_index": 5,
     "layout": "3_EXTRA",
     "detected_type": "content_3extra",
+    "shape_count": 10,
     "shapes": [
       {
         "name": "矩形: 圓角 5",
@@ -262,7 +295,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "矩形: 圓角 7",
@@ -270,7 +304,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "矩形: 圓角 4",
@@ -278,7 +313,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "content_1",
@@ -286,7 +322,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What it does:\nLimits current\nDrops voltage\nProtects components\n\n*Without a resistor, many components would burn."
       },
       {
         "name": "item_1",
@@ -294,7 +331,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Resistor"
       },
       {
         "name": "item_2",
@@ -302,7 +340,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Capacitor"
       },
       {
         "name": "content_3",
@@ -310,7 +349,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What it does:\nLights up when current flows in one direction\n\nImportant rules:\nHas polarity (+ and −)\nAlways needs a resi"
       },
       {
         "name": "item_3",
@@ -318,7 +358,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "LED Light Emitting Diode"
       },
       {
         "name": "title",
@@ -326,7 +367,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "The 3 most common components"
       },
       {
         "name": "content_2",
@@ -334,7 +376,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What it does:\nStores a small amount of charge\nSmooths voltage\nBlocks DC, passes AC (for now: “filters noise”)\n\n*A shock "
       }
     ]
   },
@@ -342,6 +385,7 @@
     "slide_index": 6,
     "layout": "3_EXTRA",
     "detected_type": "content_2_a",
+    "shape_count": 8,
     "shapes": [
       {
         "name": "矩形: 剪去單一角落 3",
@@ -349,7 +393,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "img_2",
@@ -357,7 +402,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       },
       {
         "name": "img_1",
@@ -365,7 +411,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       },
       {
         "name": "title",
@@ -373,7 +420,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Diode vs LED"
       },
       {
         "name": "content_1",
@@ -381,7 +429,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What it does:\nAllows current to flow in one direction only\nUsed for protection and rectification\nBeginner intuition:\nA o"
       },
       {
         "name": "content_2",
@@ -389,7 +438,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "A diode that emits light\nNeeds current limiting resistor\nHas polarity:\nAnode (+)\nCathode (−)\n📌 On real LEDs:\nLong leg = "
       },
       {
         "name": "title_content_1",
@@ -397,7 +447,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Diode"
       },
       {
         "name": "title_content_2",
@@ -405,14 +456,16 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "LED"
       }
     ]
   },
   {
     "slide_index": 7,
     "layout": "3_EXTRA",
-    "detected_type": "unknown",
+    "detected_type": "content_2_b",
+    "shape_count": 5,
     "shapes": [
       {
         "name": "直角三角形 3",
@@ -420,7 +473,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "content_1",
@@ -428,7 +482,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "What a switch really does\nIt opens or closes a circuit\nNo electricity flows if the circuit is open\nSimple switch symbol\n"
       },
       {
         "name": "content_2",
@@ -436,7 +491,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "🔋 Battery\nFixed voltage\nLimited current\nSlowly drains\n🔌 Power supply\nStable voltage\nCan supply more current\nUsed in labs"
       },
       {
         "name": "title_content_1",
@@ -444,7 +500,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Switches & Buttons"
       },
       {
         "name": "title_content_2",
@@ -452,7 +509,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Batteries vs Power Supplies"
       }
     ]
   },
@@ -460,6 +518,7 @@
     "slide_index": 8,
     "layout": "3_EXTRA",
     "detected_type": "table",
+    "shape_count": 3,
     "shapes": [
       {
         "name": "矩形: 剪去同側角落 1",
@@ -467,7 +526,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "title",
@@ -475,7 +535,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Polarity"
       },
       {
         "name": "sheet_1",
@@ -483,7 +544,8 @@
         "has_text": false,
         "has_table": true,
         "has_chart": false,
-        "shape_type": "TABLE (19)"
+        "shape_type": "TABLE (19)",
+        "text_preview": ""
       }
     ]
   },
@@ -491,6 +553,7 @@
     "slide_index": 9,
     "layout": "3_EXTRA",
     "detected_type": "content_image",
+    "shape_count": 4,
     "shapes": [
       {
         "name": "矩形: 剪去同側角落 5",
@@ -498,7 +561,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "title",
@@ -506,7 +570,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Decoupling capacitors"
       },
       {
         "name": "content",
@@ -514,7 +579,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Near every IC, Why?\nICs need stable voltage\nCapacitors absorb noise and spikes\n\nBeginner takeaway:\nCapacitors are “local"
       },
       {
         "name": "img",
@@ -522,14 +588,16 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       }
     ]
   },
   {
     "slide_index": 10,
     "layout": "3_EXTRA",
-    "detected_type": "unknown",
+    "detected_type": "content_text",
+    "shape_count": 4,
     "shapes": [
       {
         "name": "圖片 9",
@@ -537,7 +605,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       },
       {
         "name": "矩形 2",
@@ -545,7 +614,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "title",
@@ -553,7 +623,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Decoupling capacitors"
       },
       {
         "name": "content",
@@ -561,7 +632,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Near every IC, Why?\nICs need stable voltage\nCapacitors absorb noise and spikes"
       }
     ]
   },
@@ -569,6 +641,7 @@
     "slide_index": 11,
     "layout": "3_EXTRA",
     "detected_type": "content_2_c",
+    "shape_count": 6,
     "shapes": [
       {
         "name": "矩形 11",
@@ -576,7 +649,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "item_1",
@@ -584,7 +658,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Pull-up resistors"
       },
       {
         "name": "content_1",
@@ -592,7 +667,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "When the switch/transistor is open \n→ signal is pulled HIGH\n\nWhen the switch/transistor is closed to ground \n→ signal be"
       },
       {
         "name": "矩形 19",
@@ -600,7 +676,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "content_2",
@@ -608,7 +685,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Nothing driving the line\n→ resistor pulls signal LOW \n\nSwitch or output drives to Vcc \n→ signal becomes HIGH\n\nThe resist"
       },
       {
         "name": "item_2",
@@ -616,7 +694,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Pull-down resistors"
       }
     ]
   },
@@ -624,6 +703,7 @@
     "slide_index": 12,
     "layout": "3_EXTRA",
     "detected_type": "content_4_a",
+    "shape_count": 9,
     "shapes": [
       {
         "name": "直線接點 12",
@@ -631,7 +711,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "LINE (9)"
+        "shape_type": "LINE (9)",
+        "text_preview": ""
       },
       {
         "name": "直線接點 15",
@@ -639,7 +720,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "LINE (9)"
+        "shape_type": "LINE (9)",
+        "text_preview": ""
       },
       {
         "name": "直線接點 17",
@@ -647,7 +729,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "LINE (9)"
+        "shape_type": "LINE (9)",
+        "text_preview": ""
       },
       {
         "name": "直線接點 18",
@@ -655,7 +738,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "LINE (9)"
+        "shape_type": "LINE (9)",
+        "text_preview": ""
       },
       {
         "name": "content_1",
@@ -663,7 +747,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Power block\nRegulator\nCapacitors\nProtection diode"
       },
       {
         "name": "content_2",
@@ -671,7 +756,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Input block\nConnector\nResistor\nFilter capacitor"
       },
       {
         "name": "content_3",
@@ -679,7 +765,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Processing block\nIC\nSupporting parts"
       },
       {
         "name": "content_4",
@@ -687,7 +774,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Output block\nTransistor / IC pin\nLoad (LED, motor)"
       },
       {
         "name": "title",
@@ -695,7 +783,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Common schematic blocks"
       }
     ]
   },
@@ -703,6 +792,7 @@
     "slide_index": 13,
     "layout": "3_EXTRA",
     "detected_type": "content_4_b",
+    "shape_count": 10,
     "shapes": [
       {
         "name": "矩形 11",
@@ -710,7 +800,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "item_1",
@@ -718,7 +809,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Pull-up resistors"
       },
       {
         "name": "content_1",
@@ -726,7 +818,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "When the switch/transistor is open \n→ signal is pulled HIGH\n\nWhen the switch/transistor is closed to ground \n→ signal be"
       },
       {
         "name": "矩形 19",
@@ -734,7 +827,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "content_2",
@@ -742,7 +836,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Nothing driving the line\n→ resistor pulls signal LOW \n\nSwitch or output drives to Vcc \n→ signal becomes HIGH\n\nThe resist"
       },
       {
         "name": "item_2",
@@ -750,7 +845,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Pull-down resistors"
       },
       {
         "name": "item_3",
@@ -758,7 +854,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Pull-down resistors"
       },
       {
         "name": "item_4",
@@ -766,7 +863,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Pull-down resistors"
       },
       {
         "name": "content_3",
@@ -774,7 +872,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Nothing driving the line\n→ resistor pulls signal LOW \n\nSwitch or output drives to Vcc \n→ signal becomes HIGH\n\nThe resist"
       },
       {
         "name": "content_4",
@@ -782,7 +881,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Nothing driving the line\n→ resistor pulls signal LOW \n\nSwitch or output drives to Vcc \n→ signal becomes HIGH\n\nThe resist"
       }
     ]
   },
@@ -790,6 +890,7 @@
     "slide_index": 14,
     "layout": "3_EXTRA",
     "detected_type": "flow",
+    "shape_count": 3,
     "shapes": [
       {
         "name": "矩形: 剪去同側角落 1",
@@ -797,7 +898,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "title",
@@ -805,7 +907,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Polarity"
       },
       {
         "name": "flow_chart_1",
@@ -813,14 +916,16 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "None"
+        "shape_type": "None",
+        "text_preview": ""
       }
     ]
   },
   {
     "slide_index": 15,
     "layout": "3_EXTRA",
-    "detected_type": "unknown",
+    "detected_type": "flow",
+    "shape_count": 3,
     "shapes": [
       {
         "name": "矩形: 剪去同側角落 1",
@@ -828,7 +933,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "title",
@@ -836,7 +942,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Polarity"
       },
       {
         "name": "flow_chart_2",
@@ -844,14 +951,16 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "None"
+        "shape_type": "None",
+        "text_preview": ""
       }
     ]
   },
   {
     "slide_index": 16,
     "layout": "3_EXTRA",
-    "detected_type": "unknown",
+    "detected_type": "flow",
+    "shape_count": 3,
     "shapes": [
       {
         "name": "矩形: 剪去同側角落 1",
@@ -859,7 +968,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "AUTO_SHAPE (1)"
+        "shape_type": "AUTO_SHAPE (1)",
+        "text_preview": ""
       },
       {
         "name": "title",
@@ -867,7 +977,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Polarity"
       },
       {
         "name": "flow_chart_3",
@@ -875,7 +986,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "None"
+        "shape_type": "None",
+        "text_preview": ""
       }
     ]
   },
@@ -883,6 +995,7 @@
     "slide_index": 17,
     "layout": "1_標題投影片",
     "detected_type": "end",
+    "shape_count": 5,
     "shapes": [
       {
         "name": "Picture 2",
@@ -890,7 +1003,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       },
       {
         "name": "文字方塊 27",
@@ -898,7 +1012,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Stay in touch!"
       },
       {
         "name": "文字方塊 4",
@@ -906,7 +1021,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "TEXT_BOX (17)"
+        "shape_type": "TEXT_BOX (17)",
+        "text_preview": "Thank You\nFor Listening"
       },
       {
         "name": "Picture Placeholder 5",
@@ -914,7 +1030,8 @@
         "has_text": false,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PICTURE (13)"
+        "shape_type": "PICTURE (13)",
+        "text_preview": ""
       },
       {
         "name": "投影片編號版面配置區 4",
@@ -922,7 +1039,8 @@
         "has_text": true,
         "has_table": false,
         "has_chart": false,
-        "shape_type": "PLACEHOLDER (14)"
+        "shape_type": "PLACEHOLDER (14)",
+        "text_preview": "17"
       }
     ]
   }
