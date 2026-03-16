@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import json
+from pathlib import Path
+
+
 SLIDE_REGISTRY = {
 
     # --------------------------------------------------
@@ -120,3 +124,25 @@ SLIDE_REGISTRY = {
         "description": "Thank you slide."
     },
 }
+
+
+def _apply_template_map_overrides():
+    """Best-effort sync of template indexes from template_map.json detected_type."""
+    template_map_path = Path(__file__).resolve().parent / "template_map.json"
+    if not template_map_path.exists():
+        return
+
+    try:
+        data = json.loads(template_map_path.read_text(encoding="utf-8"))
+    except Exception:
+        return
+
+    for slide in data:
+        detected_type = slide.get("detected_type")
+        slide_index = slide.get("slide_index")
+
+        if detected_type in SLIDE_REGISTRY and isinstance(slide_index, int) and slide_index > 0:
+            SLIDE_REGISTRY[detected_type]["template_slide_index"] = slide_index
+
+
+_apply_template_map_overrides()
