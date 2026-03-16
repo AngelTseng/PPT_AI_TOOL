@@ -4,6 +4,13 @@ import json
 from pathlib import Path
 
 
+FLOW_TEMPLATE_INDEX = {
+    "flow_chart_1": 12,
+    "flow_chart_2": 12,
+    "flow_chart_3": 12,
+}
+
+
 SLIDE_REGISTRY = {
 
     # --------------------------------------------------
@@ -126,6 +133,15 @@ SLIDE_REGISTRY = {
 }
 
 
+
+
+def _detect_flow_variant_from_shapes(shapes):
+    names = {str(s.get("name", "")).strip().lower() for s in shapes}
+    for variant in ("flow_chart_1", "flow_chart_2", "flow_chart_3"):
+        if variant in names:
+            return variant
+    return None
+
 def _apply_template_map_overrides():
     """Best-effort sync of template indexes from template_map.json detected_type."""
     template_map_path = Path(__file__).resolve().parent / "template_map.json"
@@ -141,8 +157,18 @@ def _apply_template_map_overrides():
         detected_type = slide.get("detected_type")
         slide_index = slide.get("slide_index")
 
-        if detected_type in SLIDE_REGISTRY and isinstance(slide_index, int) and slide_index > 0:
+        if not isinstance(slide_index, int) or slide_index <= 0:
+            continue
+
+        if detected_type in SLIDE_REGISTRY:
             SLIDE_REGISTRY[detected_type]["template_slide_index"] = slide_index
+
+        flow_variant = _detect_flow_variant_from_shapes(slide.get("shapes", []))
+        if flow_variant:
+            FLOW_TEMPLATE_INDEX[flow_variant] = slide_index
+
+    # Keep the base flow type aligned with default flow variant.
+    SLIDE_REGISTRY["flow"]["template_slide_index"] = FLOW_TEMPLATE_INDEX.get("flow_chart_1", SLIDE_REGISTRY["flow"]["template_slide_index"])
 
 
 _apply_template_map_overrides()

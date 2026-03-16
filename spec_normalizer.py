@@ -14,6 +14,19 @@ def _expand_short_text(text: str, min_chars: int = 28) -> str:
     return f"{cleaned}：補充關鍵背景、做法與預期效益。"
 
 
+def _normalize_content_image_content(slide: dict) -> str:
+    """Ensure content_image always has non-empty content for validator/renderer."""
+    content = _expand_short_text(slide.get("content", ""))
+    if content:
+        return content
+
+    title_hint = _clean_text(slide.get("title", ""))
+    if title_hint:
+        return f"{title_hint}：自行補充或刪除"
+
+    return "自行補充或刪除"
+
+
 def _normalize_cards(cards, max_cards: int):
     normalized = []
 
@@ -141,7 +154,7 @@ def normalize_beautified_spec(spec: dict) -> dict:
             normalized.append({
                 "type": "content_image",
                 "title": _clean_text(slide.get("title", "")) or "重點說明",
-                "content": _expand_short_text(slide.get("content", "")),
+                "content": _normalize_content_image_content(slide),
                 "image": _clean_text(slide.get("image", ""))
             })
 

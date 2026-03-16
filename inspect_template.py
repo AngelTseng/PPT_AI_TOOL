@@ -39,8 +39,8 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
     if has("agenda_name"):
         return "section"
 
-    # flow
-    if has("flow_chart_1"):
+    # flow (support three variants)
+    if has("flow_chart_1") or has("flow_chart_2") or has("flow_chart_3"):
         return "flow"
 
     # table

@@ -1,7 +1,7 @@
 import os
 import shutil
 import win32com.client as win32
-from slide_registry import SLIDE_REGISTRY
+from slide_registry import FLOW_TEMPLATE_INDEX, SLIDE_REGISTRY
 import pythoncom
 
 SLIDE_RENDERERS = {}
@@ -50,6 +50,63 @@ def _clamp_shape_within_slide(slide, shape):
     except Exception:
         pass
 
+
+
+
+def choose_flow_variant(slide_spec: dict) -> str:
+    title = str(slide_spec.get("title", "")).lower()
+    steps = [str(s).lower() for s in slide_spec.get("steps", [])]
+    text = " ".join([title] + steps)
+
+    loop_keywords = [
+        "iteration", "iterate", "feedback", "cycle", "optimize", "improve", "review",
+        "迭代", "循環", "回饋", "優化", "改善", "檢討"
+    ]
+    linear_keywords = [
+        "first", "then", "next", "finally", "phase", "stage", "process",
+        "首先", "接著", "然後", "最後", "階段", "流程"
+    ]
+    framework_keywords = [
+        "module", "stream", "framework", "layer", "pillar", "architecture",
+        "模組", "工作流", "架構", "層", "面向", "支柱"
+    ]
+
+    loop_score = sum(1 for kw in loop_keywords if kw in text)
+    linear_score = sum(1 for kw in linear_keywords if kw in text)
+    framework_score = sum(1 for kw in framework_keywords if kw in text)
+
+    if loop_score >= max(linear_score, framework_score) and loop_score > 0:
+        return "flow_chart_2"
+    if framework_score >= max(linear_score, loop_score) and framework_score > 0:
+        return "flow_chart_3"
+    return "flow_chart_1"
+
+
+def _resolve_flow_prefer_name(slide, slide_spec: dict) -> str | None:
+    candidate = choose_flow_variant(slide_spec)
+
+    for name in (candidate, "flow_chart_1", "flow_chart_2", "flow_chart_3"):
+        shp = shape_by_name(slide, name)
+        try:
+            if shp is not None and getattr(shp, "HasSmartArt", False):
+                return name
+        except Exception:
+            pass
+
+    return None
+
+
+def _find_template_slide_index_by_shape(src_pres, shape_name: str) -> int | None:
+    for i in range(1, src_pres.Slides.Count + 1):
+        slide = src_pres.Slides(i)
+        for j in range(1, slide.Shapes.Count + 1):
+            shp = slide.Shapes(j)
+            try:
+                if str(shp.Name).strip().lower() == shape_name.lower():
+                    return i
+            except Exception:
+                continue
+    return None
 
 def register_renderer(name):
     def wrapper(func):
@@ -609,12 +666,15 @@ def render_flow(slide, slide_spec):
     set_text(slide, "title", str(slide_spec.get("title", "")))
     steps = slide_spec.get("steps", [])
 
+    prefer_name = _resolve_flow_prefer_name(slide, slide_spec)
+
     smart_shape, current_count = ensure_smartart_nodes(
         slide,
         len(steps),
-        prefer_name="flow_chart_1"
+        prefer_name=prefer_name
     )
 
+    print(f"[DEBUG] Flow variant selected: {prefer_name}")
     print(f"[DEBUG] Flow template nodes before adjust: {current_count}")
     print(f"[DEBUG] Flow steps requested: {len(steps)}")
 
@@ -622,11 +682,11 @@ def render_flow(slide, slide_spec):
         _, final_count = reduce_smartart_nodes(
             slide,
             len(steps),
-            prefer_name="flow_chart_1"
+            prefer_name=prefer_name
         )
         print(f"[DEBUG] Flow template nodes after reduce: {final_count}")
 
-    fill_smartart_steps(slide, steps, prefer_name="flow_chart_1")
+    fill_smartart_steps(slide, steps, prefer_name=prefer_name)
 
 @register_renderer("content_image")
 def render_content_image(slide, slide_spec):
@@ -649,7 +709,18 @@ def render_slide(slide, slide_spec):
 
     fn(slide, slide_spec)
 
-def get_template_slide_index(slide_type, src_pres):
+def get_template_slide_index(slide_type, src_pres, slide_spec=None):
+    if slide_type == "flow":
+        variant = choose_flow_variant(slide_spec or {})
+        variant_idx = FLOW_TEMPLATE_INDEX.get(variant)
+        if isinstance(variant_idx, int) and 1 <= variant_idx <= src_pres.Slides.Count:
+            return variant_idx
+
+        # fallback: scan template by SmartArt shape name if mapping is stale
+        scanned = _find_template_slide_index_by_shape(src_pres, variant)
+        if isinstance(scanned, int):
+            return scanned
+
     cfg = SLIDE_REGISTRY[slide_type]
     idx = cfg["template_slide_index"]
     if idx == "LAST":
@@ -683,7 +754,7 @@ def render_deck(template_pptx: str, deck_spec: dict, out_pptx: str):
                 print(f"[WARN] Skip unsupported slide type: {slide_type}")
                 continue
 
-            src_idx = get_template_slide_index(slide_type, src)
+            src_idx = get_template_slide_index(slide_type, src, slide_spec)
             src_slide = src.Slides(src_idx)
 
             new_slide = duplicate_to_presentation(src_slide, dst)

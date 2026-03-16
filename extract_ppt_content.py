@@ -198,6 +198,18 @@ def get_smartart_steps(slide, prefer_name=None):
     return steps
 
 
+
+
+def detect_flow_prefer_name(slide):
+    for name in ("flow_chart_1", "flow_chart_2", "flow_chart_3"):
+        shp = shape_by_name(slide, name)
+        try:
+            if shp is not None and getattr(shp, "HasSmartArt", False):
+                return name
+        except Exception:
+            pass
+    return None
+
 def detect_slide_type(slide) -> str:
     # cover
     if shape_by_name(slide, "Topic") and shape_by_name(slide, "speaker_name"):
@@ -243,13 +255,9 @@ def detect_slide_type(slide) -> str:
     except Exception:
         pass
 
-    # flow
-    shp = shape_by_name(slide, "flow_chart_1")
-    try:
-        if shp is not None and getattr(shp, "HasSmartArt", False):
-            return "flow"
-    except Exception:
-        pass
+    # flow (support three variants)
+    if detect_flow_prefer_name(slide):
+        return "flow"
 
     return "unknown"
 
@@ -356,10 +364,11 @@ def extract_table(slide):
 
 
 def extract_flow(slide):
+    prefer_name = detect_flow_prefer_name(slide)
     return {
         "type": "flow",
         "title": get_text_from_shape(slide, "title"),
-        "steps": get_smartart_steps(slide, prefer_name="flow_chart_1"),
+        "steps": get_smartart_steps(slide, prefer_name=prefer_name),
     }
 
 def extract_unknown(slide):
