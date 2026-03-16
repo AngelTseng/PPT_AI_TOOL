@@ -178,6 +178,7 @@ Slide usage guidance:
 - content_2 variants (content_2/content_2_a/content_2_b/content_2_c): two grouped ideas or two-column explanation
 - content_3extra: exactly three grouped ideas or three parallel highlights
 - content_image: one key image with one explanatory text block
+- If a slide has only one core idea/content block, prefer content_image as the one-content slide (do not force it into content_2/content_3extra/content_4).
 - content_4 variants (content_4/content_4_a/content_4_b): four grouped ideas, four capabilities, or four-item summary
 - table: comparisons, structured facts, grouped responsibilities, categories, tools, or capability summaries
 - flow: process, sequence, collaboration stages, lifecycle, or learning path
@@ -188,6 +189,7 @@ Strong layout guidance:
 - If content naturally fits 4 grouped ideas, prefer content_4 or table.
 - Only use content_3extra when the content truly fits a 3-point grouped layout.
 - If a slide reads like a chapter heading or transition, prefer section.
+- If a slide has a single key message with one supporting paragraph, prefer content_image over multi-card layouts.
 - If a slide contains categories, grouped facts, responsibilities, tools, or capability summaries, prefer table.
 - If a slide contains stages, phases, sequence, workflow, or lifecycle, prefer flow.
 - Do not default every explanatory slide to content_3extra.
