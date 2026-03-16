@@ -5,9 +5,9 @@ from pathlib import Path
 
 
 FLOW_TEMPLATE_INDEX = {
-    "flow_chart_1": 12,
-    "flow_chart_2": 12,
-    "flow_chart_3": 12,
+    "flow_chart_1": 14,
+    "flow_chart_2": 15,
+    "flow_chart_3": 16,
 }
 
 
@@ -46,10 +46,17 @@ SLIDE_REGISTRY = {
     # 3 card slide
     # --------------------------------------------------
     "content_3extra": {
-        "template_slide_index": 4,
+        "template_slide_index": 5,
         "required_fields": ["title", "cards"],
         "max_cards": 3,
         "description": "Three card content slide."
+    },
+
+    "content_3extra_image": {
+        "template_slide_index": 4,
+        "required_fields": ["title", "cards"],
+        "max_cards": 3,
+        "description": "Three card content slide with image accents."
     },
 
     # --------------------------------------------------
@@ -96,18 +103,24 @@ SLIDE_REGISTRY = {
         "description": "Single image with text slide."
     },
 
+    "content_text": {
+        "template_slide_index": 10,
+        "required_fields": ["title", "content"],
+        "description": "Text-heavy content slide with shape background."
+    },
+
     # --------------------------------------------------
     # 4 card slides
     # --------------------------------------------------
     "content_4_a": {
-        "template_slide_index": 10,
+        "template_slide_index": 12,
         "required_fields": ["title", "cards"],
         "max_cards": 4,
         "description": "Four card slide variant A."
     },
 
     "content_4_b": {
-        "template_slide_index": 11,
+        "template_slide_index": 13,
         "required_fields": ["title", "cards"],
         "max_cards": 4,
         "description": "Four card slide variant B."
@@ -117,7 +130,7 @@ SLIDE_REGISTRY = {
     # Flow slide
     # --------------------------------------------------
     "flow": {
-        "template_slide_index": 12,
+        "template_slide_index": 14,
         "required_fields": ["title", "steps"],
         "description": "Flow / SmartArt slide."
     },
@@ -126,7 +139,7 @@ SLIDE_REGISTRY = {
     # Ending slide
     # --------------------------------------------------
     "end": {
-        "template_slide_index": 13,
+        "template_slide_index": 17,
         "required_fields": [],
         "description": "Thank you slide."
     },

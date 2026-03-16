@@ -4,7 +4,8 @@ SUPPORTED_TYPES = set(SLIDE_REGISTRY.keys())
 
 CONTENT_2_TYPES = {"content_2_a", "content_2_b", "content_2_c"}
 CONTENT_4_TYPES = {"content_4_a", "content_4_b"}
-CONTENT_TYPES = CONTENT_2_TYPES | CONTENT_4_TYPES | {"content_3extra", "content_image", "table", "flow"}
+CONTENT_3_TYPES = {"content_3extra", "content_3extra_image"}
+CONTENT_TYPES = CONTENT_2_TYPES | CONTENT_3_TYPES | CONTENT_4_TYPES | {"content_image", "content_text", "table", "flow"}
 
 
 def _text_len(value) -> int:
@@ -62,13 +63,26 @@ def check_section_coverage(spec: dict):
     warnings = []
     slides = spec.get("slides", [])
 
-    for i, slide in enumerate(slides[:-1]):
-        if slide.get("type") == "section":
-            next_type = slides[i + 1].get("type")
-            if next_type not in CONTENT_TYPES:
-                warnings.append(
-                    f"Section slide at position {i+1} is not immediately followed by a content slide."
-                )
+    for i, slide in enumerate(slides):
+        if slide.get("type") != "section":
+            continue
+
+        has_content_under_section = False
+        for j in range(i + 1, len(slides)):
+            t = slides[j].get("type")
+            if t == "section":
+                break
+            if t in CONTENT_TYPES:
+                has_content_under_section = True
+                break
+
+        if not has_content_under_section:
+            warnings.append(
+                f"Section slide at position {i+1} has no dedicated content slide before next section/end."
+            )
+
+        if i + 1 < len(slides) and slides[i + 1].get("type") == "section":
+            warnings.append(f"Section slide at position {i+1} is followed by another section slide.")
 
     return warnings
 
@@ -110,14 +124,12 @@ def validate_deck_spec(spec: dict):
                 if _text_len(card.get("content", "")) < 16:
                     warnings.append(f"slides[{i}].cards[{c_idx}].content is very short")
 
-        elif t == "content_3extra":
+        elif t in CONTENT_3_TYPES:
             cards = slide.get("cards", [])
             if not isinstance(cards, list):
                 errors.append(f"slides[{i}].cards must be list")
-            elif len(cards) > 3:
-                warnings.append(f"slides[{i}].cards >3 , extra ignored")
-            elif len(cards) < 3:
-                warnings.append(f"slides[{i}].cards <3 , layout may look incomplete")
+            elif len(cards) != 3:
+                errors.append(f"slides[{i}].cards must be exactly 3 for {t}")
 
             for c_idx, card in enumerate(cards, start=1):
                 if _text_len(card.get("content", "")) < 16:
@@ -127,16 +139,14 @@ def validate_deck_spec(spec: dict):
             cards = slide.get("cards", [])
             if not isinstance(cards, list):
                 errors.append(f"slides[{i}].cards must be list")
-            elif len(cards) > 4:
-                warnings.append(f"slides[{i}].cards >4 , extra ignored")
-            elif len(cards) < 4:
-                warnings.append(f"slides[{i}].cards <4 , layout may look incomplete")
+            elif len(cards) != 4:
+                errors.append(f"slides[{i}].cards must be exactly 4 for {t}")
 
             for c_idx, card in enumerate(cards, start=1):
                 if _text_len(card.get("content", "")) < 16:
                     warnings.append(f"slides[{i}].cards[{c_idx}].content is very short")
 
-        elif t == "content_image":
+        elif t in {"content_image", "content_text"}:
             if not slide.get("title"):
                 errors.append(f"slides[{i}].title is required")
             if not slide.get("content"):
