@@ -512,26 +512,39 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
 
     return True
 
-def clear_textboxes_except(slide, keep_names: set):
-    for i in range(1, slide.Shapes.Count + 1):
+def delete_textboxes_except(slide, keep_names: set[str]):
+    for i in range(slide.Shapes.Count, 0, -1):
         shp = slide.Shapes(i)
 
-        # Always keep SmartArt (avoid accidental wiping)
+        try:
+            name = str(shp.Name)
+        except Exception:
+            continue
+
+        if name in keep_names:
+            continue
+
+        try:
+            if shp.HasTable:
+                continue
+        except Exception:
+            pass
+
         try:
             if getattr(shp, "HasSmartArt", False):
                 continue
         except Exception:
             pass
 
-        if shp.Name in keep_names:
-            continue
-
         try:
             if shp.HasTextFrame:
-                shp.TextFrame.TextRange.Text = ""
+                shp.Delete()
         except Exception:
-            pass
-
+            try:
+                if shp.HasTextFrame:
+                    shp.TextFrame.TextRange.Text = ""
+            except Exception:
+                pass
 
 def duplicate_to_presentation(src_slide, dst_pres):
     """
@@ -623,31 +636,40 @@ def detect_slide_text_color(slide):
 
 @register_renderer("cover")
 def render_cover(slide, slide_spec):
+    keep_names = {"Topic", "speaker_name"}
+
     set_text(slide, "Topic", str(slide_spec.get("topic", "")), no_wrap=True)
     set_text(slide, "speaker_name", str(slide_spec.get("speaker", "")))
 
+    return keep_names
 
 @register_renderer("agenda")
 def render_agenda(slide, slide_spec):
+    keep_names = {"outline"}
 
     set_text(slide, "outline", slide_spec.get("title", "Agenda"), bold=True, no_wrap=True)
 
     items = slide_spec.get("items", [])
 
     for i in range(1, 6):
+        name = f"agenda_{i}"
+        keep_names.add(name)
 
         text = items[i-1] if i <= len(items) else ""
 
         set_text(
             slide,
-            f"agenda_{i}",
+            name,
             text,
             bold=True,
             auto_color=True
         )
-        
+
+    return keep_names
+
 @register_renderer("section")
 def render_section(slide, slide_spec):
+    keep_names = {"agenda_name"}
 
     set_text(
         slide,
@@ -657,25 +679,40 @@ def render_section(slide, slide_spec):
         auto_color=True
     )
 
+    return keep_names
+
 @register_renderer("content_2")
 def render_content_2(slide, slide_spec):
+    keep_names = set()
+
     if shape_by_name(slide, "title"):
+        keep_names.add("title")
         set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
 
     cards = slide_spec.get("cards", [])
 
     for i in range(1, 3):
+        item_name = f"item_{i}"
+        content_name = f"content_{i}"
+
+        if shape_by_name(slide, item_name):
+            keep_names.add(item_name)
+        if shape_by_name(slide, content_name):
+            keep_names.add(content_name)
+
         if i <= len(cards):
             card = cards[i - 1]
-            if shape_by_name(slide, f"item_{i}"):
-                set_text(slide, f"item_{i}", str(card.get("item", "")))
-            if shape_by_name(slide, f"content_{i}"):
-                set_text(slide, f"content_{i}", str(card.get("content", "")))
+            if shape_by_name(slide, item_name):
+                set_text(slide, item_name, str(card.get("item", "")))
+            if shape_by_name(slide, content_name):
+                set_text(slide, content_name, str(card.get("content", "")))
         else:
-            if shape_by_name(slide, f"item_{i}"):
-                set_text(slide, f"item_{i}", "")
-            if shape_by_name(slide, f"content_{i}"):
-                set_text(slide, f"content_{i}", "")
+            if shape_by_name(slide, item_name):
+                set_text(slide, item_name, "")
+            if shape_by_name(slide, content_name):
+                set_text(slide, content_name, "")
+
+    return keep_names
                 
 SLIDE_RENDERERS["content_2_a"] = render_content_2
 SLIDE_RENDERERS["content_2_b"] = render_content_2
@@ -683,44 +720,68 @@ SLIDE_RENDERERS["content_2_c"] = render_content_2
 
 @register_renderer("content_4")
 def render_content_4(slide, slide_spec):
+    keep_names = set()
+
     if shape_by_name(slide, "title"):
+        keep_names.add("title")
         set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
 
     cards = slide_spec.get("cards", [])
 
     for i in range(1, 5):
+        item_name = f"item_{i}"
+        content_name = f"content_{i}"
+
+        if shape_by_name(slide, item_name):
+            keep_names.add(item_name)
+        if shape_by_name(slide, content_name):
+            keep_names.add(content_name)
+
         if i <= len(cards):
             card = cards[i - 1]
-            if shape_by_name(slide, f"item_{i}"):
-                set_text(slide, f"item_{i}", str(card.get("item", "")))
-            if shape_by_name(slide, f"content_{i}"):
-                set_text(slide, f"content_{i}", str(card.get("content", "")))
+            if shape_by_name(slide, item_name):
+                set_text(slide, item_name, str(card.get("item", "")))
+            if shape_by_name(slide, content_name):
+                set_text(slide, content_name, str(card.get("content", "")))
         else:
-            if shape_by_name(slide, f"item_{i}"):
-                set_text(slide, f"item_{i}", "")
-            if shape_by_name(slide, f"content_{i}"):
-                set_text(slide, f"content_{i}", "")
+            if shape_by_name(slide, item_name):
+                set_text(slide, item_name, "")
+            if shape_by_name(slide, content_name):
+                set_text(slide, content_name, "")
+
+    return keep_names
                 
 SLIDE_RENDERERS["content_4_a"] = render_content_4
 SLIDE_RENDERERS["content_4_b"] = render_content_4
 
 @register_renderer("content_3extra")
 def render_content_3extra(slide, slide_spec):
+    keep_names = {"title"}
+
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     cards = slide_spec.get("cards", [])
 
     for i in range(1, 4):
+        item_name = f"item_{i}"
+        content_name = f"content_{i}"
+        keep_names.add(item_name)
+        keep_names.add(content_name)
+
         if i <= len(cards):
             card = cards[i - 1]
-            set_text(slide, f"item_{i}", str(card.get("item", "")))
-            set_text(slide, f"content_{i}", str(card.get("content", "")))
+            set_text(slide, item_name, str(card.get("item", "")))
+            set_text(slide, content_name, str(card.get("content", "")))
         else:
-            set_text(slide, f"item_{i}", "")
-            set_text(slide, f"content_{i}", "")
+            set_text(slide, item_name, "")
+            set_text(slide, content_name, "")
+
+    return keep_names
 
 
 @register_renderer("table")
 def render_table_slide(slide, slide_spec):
+    keep_names = {"title", "sheet_1"}
+
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     fill_table(
         slide,
@@ -729,13 +790,19 @@ def render_table_slide(slide, slide_spec):
         slide_spec.get("rows", [])
     )
 
+    return keep_names
+
 
 @register_renderer("flow")
 def render_flow(slide, slide_spec):
+    keep_names = {"title"}
+
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     steps = slide_spec.get("steps", [])
 
     prefer_name = _resolve_flow_prefer_name(slide, slide_spec)
+    if prefer_name:
+        keep_names.add(prefer_name)
 
     smart_shape, current_count = ensure_smartart_nodes(
         slide,
@@ -757,16 +824,28 @@ def render_flow(slide, slide_spec):
 
     fill_smartart_steps(slide, steps, prefer_name=prefer_name)
 
+    return keep_names
+
 @register_renderer("content_image")
 def render_content_image(slide, slide_spec):
+    keep_names = set()
+
     if shape_by_name(slide, "title"):
+        keep_names.add("title")
         set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+
     if shape_by_name(slide, "content"):
+        keep_names.add("content")
         set_text(slide, "content", str(slide_spec.get("content", "")))
+
+    return keep_names
 
 @register_renderer("end")
 def render_end(slide, slide_spec):
-    pass
+    return set()
+
+SLIDE_RENDERERS["content_3extra_image"] = render_content_3extra
+SLIDE_RENDERERS["content_text"] = render_content_image
 
 def render_slide(slide, slide_spec):
     t = slide_spec.get("type")
@@ -776,7 +855,8 @@ def render_slide(slide, slide_spec):
         print(f"[WARN] Unsupported slide type in render_slide: {t}")
         return
 
-    fn(slide, slide_spec)
+    keep_names = fn(slide, slide_spec) or set()
+    delete_textboxes_except(slide, keep_names)
 
 def get_template_slide_index(slide_type, src_pres, slide_spec=None):
     if slide_type == "flow":
