@@ -493,6 +493,10 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
     _shrink_text_to_fit_shape(shp)
     _clamp_shape_within_slide(slide, shp)
 
+    # Keep text within textbox and avoid visual overflow when content is longer.
+    _fit_text_to_shape(shp)
+    _clamp_shape_within_slide(slide, shp)
+
     if bold is not None:
         try:
             tr.Font.Bold = bool(bold)
