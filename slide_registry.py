@@ -5,9 +5,9 @@ from pathlib import Path
 
 
 FLOW_TEMPLATE_INDEX = {
-    "flow_chart_1": 12,
-    "flow_chart_2": 12,
-    "flow_chart_3": 12,
+    "flow_chart_1": 14,
+    "flow_chart_2": 15,
+    "flow_chart_3": 16,
 }
 
 
@@ -43,10 +43,20 @@ SLIDE_REGISTRY = {
     },
 
     # --------------------------------------------------
-    # 3 card slide
+    # 3 card slide with built-in images
+    # --------------------------------------------------
+    "content_3extra_image": {
+        "template_slide_index": 4,
+        "required_fields": ["title", "cards"],
+        "max_cards": 3,
+        "description": "Three card content slide with built-in template images."
+    },
+
+    # --------------------------------------------------
+    # 3 card slide (text only)
     # --------------------------------------------------
     "content_3extra": {
-        "template_slide_index": 4,
+        "template_slide_index": 5,
         "required_fields": ["title", "cards"],
         "max_cards": 3,
         "description": "Three card content slide."
@@ -56,21 +66,21 @@ SLIDE_REGISTRY = {
     # 2 card slides (three variants)
     # --------------------------------------------------
     "content_2_a": {
-        "template_slide_index": 5,
+        "template_slide_index": 6,
         "required_fields": ["title", "cards"],
         "max_cards": 2,
         "description": "Two card slide variant A."
     },
 
     "content_2_b": {
-        "template_slide_index": 6,
+        "template_slide_index": 7,
         "required_fields": ["title", "cards"],
         "max_cards": 2,
         "description": "Two card slide variant B."
     },
 
     "content_2_c": {
-        "template_slide_index": 9,
+        "template_slide_index": 11,
         "required_fields": ["title", "cards"],
         "max_cards": 2,
         "description": "Two card slide variant C."
@@ -80,34 +90,42 @@ SLIDE_REGISTRY = {
     # Table slide
     # --------------------------------------------------
     "table": {
-        "template_slide_index": 7,
+        "template_slide_index": 8,
         "required_fields": ["columns", "rows"],
         "optional_fields": ["title"],
         "description": "Table slide."
     },
 
     # --------------------------------------------------
-    # Image + text slide (previously unknown)
+    # One-content slide with built-in image
     # --------------------------------------------------
     "content_image": {
-        "template_slide_index": 8,
+        "template_slide_index": 9,
         "required_fields": ["title", "content"],
-        "optional_fields": ["image"],
-        "description": "Single image with text slide."
+        "description": "One-content slide using the template's built-in image."
+    },
+
+    # --------------------------------------------------
+    # One-content text slide
+    # --------------------------------------------------
+    "content_text": {
+        "template_slide_index": 10,
+        "required_fields": ["title", "content"],
+        "description": "One-content text slide."
     },
 
     # --------------------------------------------------
     # 4 card slides
     # --------------------------------------------------
     "content_4_a": {
-        "template_slide_index": 10,
+        "template_slide_index": 12,
         "required_fields": ["title", "cards"],
         "max_cards": 4,
         "description": "Four card slide variant A."
     },
 
     "content_4_b": {
-        "template_slide_index": 11,
+        "template_slide_index": 13,
         "required_fields": ["title", "cards"],
         "max_cards": 4,
         "description": "Four card slide variant B."
@@ -117,7 +135,7 @@ SLIDE_REGISTRY = {
     # Flow slide
     # --------------------------------------------------
     "flow": {
-        "template_slide_index": 12,
+        "template_slide_index": 14,
         "required_fields": ["title", "steps"],
         "description": "Flow / SmartArt slide."
     },
@@ -126,13 +144,11 @@ SLIDE_REGISTRY = {
     # Ending slide
     # --------------------------------------------------
     "end": {
-        "template_slide_index": 13,
+        "template_slide_index": 17,
         "required_fields": [],
         "description": "Thank you slide."
     },
 }
-
-
 
 
 def _detect_flow_variant_from_shapes(shapes):
@@ -141,6 +157,7 @@ def _detect_flow_variant_from_shapes(shapes):
         if variant in names:
             return variant
     return None
+
 
 def _apply_template_map_overrides():
     """Best-effort sync of template indexes from template_map.json detected_type."""
@@ -168,7 +185,10 @@ def _apply_template_map_overrides():
             FLOW_TEMPLATE_INDEX[flow_variant] = slide_index
 
     # Keep the base flow type aligned with default flow variant.
-    SLIDE_REGISTRY["flow"]["template_slide_index"] = FLOW_TEMPLATE_INDEX.get("flow_chart_1", SLIDE_REGISTRY["flow"]["template_slide_index"])
+    SLIDE_REGISTRY["flow"]["template_slide_index"] = FLOW_TEMPLATE_INDEX.get(
+        "flow_chart_1",
+        SLIDE_REGISTRY["flow"]["template_slide_index"]
+    )
 
 
 _apply_template_map_overrides()
