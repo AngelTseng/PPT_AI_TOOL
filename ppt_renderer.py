@@ -54,6 +54,80 @@ def _clamp_shape_within_slide(slide, shape):
 
 
 
+
+
+def _shape_bounds(shape):
+    try:
+        l = float(shape.Left)
+        t = float(shape.Top)
+        w = float(shape.Width)
+        h = float(shape.Height)
+        return l, t, l + w, t + h
+    except Exception:
+        return None
+
+
+def _bounds_overlap(a, b):
+    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
+
+
+def _adjust_textbox_for_overlap(slide, shape):
+    """If a text box overlaps another object, enlarge width first, then rely on shrink."""
+    try:
+        if not shape.HasTextFrame:
+            return
+    except Exception:
+        return
+
+    base = _shape_bounds(shape)
+    if base is None:
+        return
+
+    blockers = []
+    for i in range(1, slide.Shapes.Count + 1):
+        other = slide.Shapes(i)
+        if other.Name == shape.Name:
+            continue
+        try:
+            if getattr(other, 'HasTextFrame', False):
+                continue
+        except Exception:
+            pass
+        ob = _shape_bounds(other)
+        if ob is not None and _bounds_overlap(base, ob):
+            blockers.append(ob)
+
+    if not blockers:
+        return
+
+    try:
+        sw = float(slide.Parent.PageSetup.SlideWidth)
+        right_space = max(0.0, sw - (float(shape.Left) + float(shape.Width)))
+        if right_space > 6:
+            shape.Width = float(shape.Width) + min(right_space, 40.0)
+    except Exception:
+        pass
+
+
+def _delete_untouched_textboxes(slide, touched_names: set[str]):
+    for i in range(slide.Shapes.Count, 0, -1):
+        shp = slide.Shapes(i)
+        try:
+            if getattr(shp, 'HasSmartArt', False) or getattr(shp, 'HasTable', False):
+                continue
+        except Exception:
+            pass
+
+        name = str(getattr(shp, 'Name', ''))
+        if name in touched_names:
+            continue
+
+        try:
+            if shp.HasTextFrame and shp.TextFrame.HasText:
+                shp.Delete()
+        except Exception:
+            pass
+
 def choose_flow_variant(slide_spec: dict) -> str:
     title = str(slide_spec.get("title", "")).lower()
     steps = [str(s).lower() for s in slide_spec.get("steps", [])]
@@ -490,6 +564,7 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
     tr.Text = clean_text
 
     _set_wordwrap_and_autosize(shp, no_wrap=no_wrap)
+    _adjust_textbox_for_overlap(slide, shp)
     _shrink_text_to_fit_shape(shp)
     _clamp_shape_within_slide(slide, shp)
 
@@ -623,13 +698,16 @@ def detect_slide_text_color(slide):
 
 @register_renderer("cover")
 def render_cover(slide, slide_spec):
+    touched = {"Topic", "speaker_name"}
     set_text(slide, "Topic", str(slide_spec.get("topic", "")), no_wrap=True)
     set_text(slide, "speaker_name", str(slide_spec.get("speaker", "")))
+    _delete_untouched_textboxes(slide, touched)
 
 
 @register_renderer("agenda")
 def render_agenda(slide, slide_spec):
 
+    touched = {"outline"}
     set_text(slide, "outline", slide_spec.get("title", "Agenda"), bold=True, no_wrap=True)
 
     items = slide_spec.get("items", [])
@@ -637,7 +715,7 @@ def render_agenda(slide, slide_spec):
     for i in range(1, 6):
 
         text = items[i-1] if i <= len(items) else ""
-
+        touched.add(f"agenda_{i}")
         set_text(
             slide,
             f"agenda_{i}",
@@ -645,10 +723,13 @@ def render_agenda(slide, slide_spec):
             bold=True,
             auto_color=True
         )
+
+    _delete_untouched_textboxes(slide, touched)
         
 @register_renderer("section")
 def render_section(slide, slide_spec):
 
+    touched = {"agenda_name"}
     set_text(
         slide,
         "agenda_name",
@@ -656,10 +737,13 @@ def render_section(slide, slide_spec):
         bold=True,
         auto_color=True
     )
+    _delete_untouched_textboxes(slide, touched)
 
 @register_renderer("content_2")
 def render_content_2(slide, slide_spec):
+    touched = set()
     if shape_by_name(slide, "title"):
+        touched.add("title")
         set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
 
     cards = slide_spec.get("cards", [])
@@ -668,22 +752,32 @@ def render_content_2(slide, slide_spec):
         if i <= len(cards):
             card = cards[i - 1]
             if shape_by_name(slide, f"item_{i}"):
+                touched.add(f"item_{i}")
                 set_text(slide, f"item_{i}", str(card.get("item", "")))
             if shape_by_name(slide, f"content_{i}"):
+                touched.add(f"content_{i}")
                 set_text(slide, f"content_{i}", str(card.get("content", "")))
         else:
             if shape_by_name(slide, f"item_{i}"):
+                touched.add(f"item_{i}")
                 set_text(slide, f"item_{i}", "")
             if shape_by_name(slide, f"content_{i}"):
+                touched.add(f"content_{i}")
                 set_text(slide, f"content_{i}", "")
-                
+
+    _delete_untouched_textboxes(slide, touched)
+
+
 SLIDE_RENDERERS["content_2_a"] = render_content_2
 SLIDE_RENDERERS["content_2_b"] = render_content_2
 SLIDE_RENDERERS["content_2_c"] = render_content_2
 
+
 @register_renderer("content_4")
 def render_content_4(slide, slide_spec):
+    touched = set()
     if shape_by_name(slide, "title"):
+        touched.add("title")
         set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
 
     cards = slide_spec.get("cards", [])
@@ -692,35 +786,54 @@ def render_content_4(slide, slide_spec):
         if i <= len(cards):
             card = cards[i - 1]
             if shape_by_name(slide, f"item_{i}"):
+                touched.add(f"item_{i}")
                 set_text(slide, f"item_{i}", str(card.get("item", "")))
             if shape_by_name(slide, f"content_{i}"):
+                touched.add(f"content_{i}")
                 set_text(slide, f"content_{i}", str(card.get("content", "")))
         else:
             if shape_by_name(slide, f"item_{i}"):
+                touched.add(f"item_{i}")
                 set_text(slide, f"item_{i}", "")
             if shape_by_name(slide, f"content_{i}"):
+                touched.add(f"content_{i}")
                 set_text(slide, f"content_{i}", "")
-                
+
+    _delete_untouched_textboxes(slide, touched)
+
+
 SLIDE_RENDERERS["content_4_a"] = render_content_4
 SLIDE_RENDERERS["content_4_b"] = render_content_4
 
+
 @register_renderer("content_3extra")
 def render_content_3extra(slide, slide_spec):
+    touched = {"title"}
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     cards = slide_spec.get("cards", [])
 
     for i in range(1, 4):
         if i <= len(cards):
             card = cards[i - 1]
+            touched.add(f"item_{i}")
+            touched.add(f"content_{i}")
             set_text(slide, f"item_{i}", str(card.get("item", "")))
             set_text(slide, f"content_{i}", str(card.get("content", "")))
         else:
+            touched.add(f"item_{i}")
+            touched.add(f"content_{i}")
             set_text(slide, f"item_{i}", "")
             set_text(slide, f"content_{i}", "")
+
+    _delete_untouched_textboxes(slide, touched)
+
+
+SLIDE_RENDERERS["content_3extra_image"] = render_content_3extra
 
 
 @register_renderer("table")
 def render_table_slide(slide, slide_spec):
+    touched = {"title"}
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     fill_table(
         slide,
@@ -728,10 +841,12 @@ def render_table_slide(slide, slide_spec):
         slide_spec.get("columns", []),
         slide_spec.get("rows", [])
     )
+    _delete_untouched_textboxes(slide, touched)
 
 
 @register_renderer("flow")
 def render_flow(slide, slide_spec):
+    touched = {"title"}
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     steps = slide_spec.get("steps", [])
 
@@ -756,13 +871,30 @@ def render_flow(slide, slide_spec):
         print(f"[DEBUG] Flow template nodes after reduce: {final_count}")
 
     fill_smartart_steps(slide, steps, prefer_name=prefer_name)
+    _delete_untouched_textboxes(slide, touched)
 
 @register_renderer("content_image")
 def render_content_image(slide, slide_spec):
+    touched = set()
     if shape_by_name(slide, "title"):
+        touched.add("title")
         set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
     if shape_by_name(slide, "content"):
+        touched.add("content")
         set_text(slide, "content", str(slide_spec.get("content", "")))
+    _delete_untouched_textboxes(slide, touched)
+
+@register_renderer("content_text")
+def render_content_text(slide, slide_spec):
+    touched = set()
+    if shape_by_name(slide, "title"):
+        touched.add("title")
+        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+    if shape_by_name(slide, "content"):
+        touched.add("content")
+        set_text(slide, "content", str(slide_spec.get("content", "")))
+    _delete_untouched_textboxes(slide, touched)
+
 
 @register_renderer("end")
 def render_end(slide, slide_spec):

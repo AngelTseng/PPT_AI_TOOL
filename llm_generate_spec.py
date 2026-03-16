@@ -95,7 +95,11 @@ DECK_SPEC_SCHEMA = {
                             "then": {"required": ["type", "title", "content"]}
                         },
                         {
-                            "if": {"properties": {"type": {"const": "content_3extra"}}},
+                            "if": {"properties": {"type": {"const": "content_text"}}},
+                            "then": {"required": ["type", "title", "content"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"enum": ["content_3extra", "content_3extra_image"]}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
@@ -160,6 +164,7 @@ Supported slide types:
 - content_2 / content_2_a / content_2_b / content_2_c
 - content_3extra
 - content_image
+- content_text
 - content_4 / content_4_a / content_4_b
 - table
 - flow
@@ -170,7 +175,7 @@ Rules:
 - content_2/content_2_a/content_2_b/content_2_c.cards: max 2
 - content_3extra.cards: max 3
 - content_4/content_4_a/content_4_b.cards: max 4
-- content_image requires title + content
+- content_image/content_text requires title + content
 - flow.steps: at least 2
 - table.columns must not be empty
 - table.rows must not be empty
@@ -179,6 +184,12 @@ Rules:
 - output JSON only
 - no markdown
 - no explanation text
+
+- For content_3extra/content_3extra_image, always provide exactly 3 cards.
+- For content_4/content_4_a/content_4_b, always provide exactly 4 cards.
+- Alternate variants when repeated (e.g., mix content_3extra + content_3extra_image, and mix content_4_a + content_4_b).
+- Do not include coaching/suggestion text inside slide content.
+- If user asks for N slides, treat N as content-body slides count excluding cover, agenda, and end unless explicitly stated otherwise.
 
 Deck planning rules:
 - Do not make the deck visually monotonous.

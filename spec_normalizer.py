@@ -77,6 +77,9 @@ def _pick_content_variant(base_type: str, counter: int) -> str:
     if base_type == "content_2":
         variants = ["content_2_a", "content_2_b", "content_2_c"]
         return variants[counter % len(variants)]
+    if base_type == "content_3extra":
+        variants = ["content_3extra", "content_3extra_image"]
+        return variants[counter % len(variants)]
     if base_type == "content_4":
         variants = ["content_4_a", "content_4_b"]
         return variants[counter % len(variants)]
@@ -88,7 +91,9 @@ def normalize_beautified_spec(spec: dict) -> dict:
 
     content_2_types = {"content_2", "content_2_a", "content_2_b", "content_2_c"}
     content_4_types = {"content_4", "content_4_a", "content_4_b"}
+    content_3_types = {"content_3extra", "content_3extra_image"}
     content_2_counter = 0
+    content_3_counter = 0
     content_4_counter = 0
 
     for slide in slides:
@@ -128,14 +133,16 @@ def normalize_beautified_spec(spec: dict) -> dict:
                 "cards": _normalize_cards(cards, 2)
             })
 
-        elif t == "content_3extra":
+        elif t in content_3_types:
             cards = slide.get("cards")
             if cards is None:
                 items = slide.get("items", [])
                 cards = [{"item": f"Point {i}", "content": txt} for i, txt in enumerate(items[:3], start=1)]
 
+            picked_3 = _pick_content_variant("content_3extra", content_3_counter)
+            content_3_counter += 1
             normalized.append({
-                "type": "content_3extra",
+                "type": picked_3,
                 "title": _clean_text(slide.get("title", "")) or "重點整理",
                 "cards": _normalize_cards(cards, 3)
             })
@@ -152,9 +159,9 @@ def normalize_beautified_spec(spec: dict) -> dict:
                 "cards": _normalize_cards(cards, 4)
             })
 
-        elif t == "content_image":
+        elif t in {"content_image", "content_text"}:
             normalized.append({
-                "type": "content_image",
+                "type": t,
                 "title": _clean_text(slide.get("title", "")) or "重點說明",
                 "content": _normalize_content_image_content(slide),
                 "image": _clean_text(slide.get("image", ""))
