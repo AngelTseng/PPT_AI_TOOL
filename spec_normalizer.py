@@ -64,7 +64,7 @@ def _ensure_cover_and_end(slides: list[dict]) -> list[dict]:
     body_slides = []
 
     for slide in slides:
-        t = slide.get("type")
+        t = _normalize_type(slide.get("type"))
         if t == "cover" and cover_slide is None:
             cover_slide = slide
             continue
@@ -80,6 +80,26 @@ def _ensure_cover_and_end(slides: list[dict]) -> list[dict]:
         end_slide = {"type": "end"}
 
     return [cover_slide] + body_slides + [end_slide]
+
+
+
+
+def _normalize_type(value) -> str:
+    t = _clean_text(value).lower()
+    alias_map = {
+        "content_1": "content_1",
+        "content": "content",
+        "content-1": "content_1",
+        "content3": "content_3",
+        "content_3": "content_3",
+        "content-3": "content_3",
+        "content_3extra": "content_3extra",
+        "content_3_extra": "content_3extra",
+        "content_3extra_image": "content_3extra_image",
+        "content_3_extra_image": "content_3extra_image",
+        "content_3image": "content_3extra_image",
+    }
+    return alias_map.get(t, t)
 
 
 def _pick_content_variant(base_type: str, counter: int) -> str:
@@ -177,7 +197,7 @@ def normalize_beautified_spec(spec: dict) -> dict:
     content_4_counter = 0
 
     for slide in slides:
-        t = slide.get("type")
+        t = _normalize_type(slide.get("type"))
 
         # Expand generic aliases into concrete template-supported variants
         if t == "content_2":
@@ -299,7 +319,10 @@ def normalize_beautified_spec(spec: dict) -> dict:
             normalized.append({"type": "end"})
 
         else:
-            normalized.append(slide)
+            fallback = dict(slide)
+            if t:
+                fallback["type"] = t
+            normalized.append(fallback)
 
     normalized = _rebalance_single_content_variants(normalized)
     normalized = _rebalance_content_3_variants(normalized)
