@@ -106,9 +106,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "Oval 16",
@@ -117,9 +117,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "Oval 17",
@@ -128,9 +128,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "Oval 18",
@@ -139,9 +139,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "Oval 14",
@@ -150,9 +150,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "agenda_1",
@@ -347,9 +347,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "矩形: 圓角 7",
@@ -358,9 +358,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "矩形: 圓角 4",
@@ -369,9 +369,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "content_1",
@@ -464,9 +464,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "img_2",
@@ -559,9 +559,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "content_1",
@@ -621,9 +621,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "title",
@@ -661,9 +661,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "title",
@@ -723,9 +723,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "title",
@@ -763,9 +763,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "item_1",
@@ -796,9 +796,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "content_2",
@@ -942,9 +942,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "item_1",
@@ -975,9 +975,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "content_2",
@@ -1059,9 +1059,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "title",
@@ -1083,7 +1083,7 @@
         "shape_type": "None",
         "role": "protected",
         "allow_text_overlap": false,
-        "protect_reason": "unknown_object"
+        "protect_reason": "flow_chart"
       }
     ]
   },
@@ -1099,9 +1099,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "title",
@@ -1123,7 +1123,7 @@
         "shape_type": "None",
         "role": "protected",
         "allow_text_overlap": false,
-        "protect_reason": "unknown_object"
+        "protect_reason": "flow_chart"
       }
     ]
   },
@@ -1139,9 +1139,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "AUTO_SHAPE (1)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
       },
       {
         "name": "title",
@@ -1163,7 +1163,7 @@
         "shape_type": "None",
         "role": "protected",
         "allow_text_overlap": false,
-        "protect_reason": "unknown_object"
+        "protect_reason": "flow_chart"
       }
     ]
   },
@@ -1190,9 +1190,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "TEXT_BOX (17)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape_with_text_frame"
       },
       {
         "name": "文字方塊 4",
@@ -1201,9 +1201,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "TEXT_BOX (17)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape_with_text_frame"
       },
       {
         "name": "Picture Placeholder 5",
@@ -1223,9 +1223,9 @@
         "has_table": false,
         "has_chart": false,
         "shape_type": "PLACEHOLDER (14)",
-        "role": "protected",
-        "allow_text_overlap": false,
-        "protect_reason": "text_container"
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape_with_text_frame"
       }
     ]
   }

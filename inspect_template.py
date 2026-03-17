@@ -92,7 +92,6 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
 
     return "unknown"
 
-
 def classify_shape(shp, slide_type: str, slide_index: int):
     name = str(getattr(shp, "name", "") or "").strip()
     lname = name.lower()
@@ -102,29 +101,47 @@ def classify_shape(shp, slide_type: str, slide_index: int):
     has_chart = bool(getattr(shp, "has_chart", False))
     shape_type = getattr(shp, "shape_type", None)
 
-    # 1) 表格 / 圖表 / 有文字框的內容物件：保護
+    protected_text_names = {
+        "topic",
+        "speaker_name",
+        "outline",
+        "agenda_name",
+        "agenda_1", "agenda_2", "agenda_3", "agenda_4", "agenda_5",
+        "title",
+        "content",
+        "content_1", "content_2", "content_3", "content_4",
+        "item_1", "item_2", "item_3", "item_4",
+        "title_content_1", "title_content_2",
+    }
+
+    # 1) 表格 / 圖表 一律保護
     if has_table:
         return "protected", False, "table"
     if has_chart:
         return "protected", False, "chart"
-    if has_text:
+
+    # 2) flow chart 物件一律保護
+    if lname.startswith("flow_chart_"):
+        return "protected", False, "flow_chart"
+
+    # 3) 明確命名的內容文字框才保護
+    if lname in protected_text_names:
         return "protected", False, "text_container"
 
-    # 2) 首頁主圖片：保護
+    # 4) 首頁主圖片：保護
     if slide_type == "cover" and shape_type == MSO_SHAPE_TYPE.PICTURE:
         return "protected", False, "cover_image"
 
-    # 3) content_image 的主圖片：保護
+    # 5) slide 9 / content_image 的主圖片：保護
     if slide_type == "content_image" and shape_type == MSO_SHAPE_TYPE.PICTURE:
-        # 若這頁可能有多張圖，可再縮成只保護 img / img_1 / main_image
-        if lname in {"img", "img_1", "main_image", "picture_1"} or "img" in lname:
+        if lname in {"img", "img_1", "main_image", "picture_1"} or lname.startswith("img"):
             return "protected", False, "content_image_main_picture"
 
-    # 4) 其他圖片：背景
+    # 6) 其他圖片：背景
     if shape_type == MSO_SHAPE_TYPE.PICTURE:
         return "background", True, "decorative_picture"
 
-    # 5) 幾何圖形 / 線條 / 群組：背景
+    # 7) 幾何圖形 / 線條 / 群組：背景
     if shape_type in {
         MSO_SHAPE_TYPE.AUTO_SHAPE,
         MSO_SHAPE_TYPE.FREEFORM,
@@ -134,9 +151,12 @@ def classify_shape(shp, slide_type: str, slide_index: int):
     }:
         return "background", True, "decorative_shape"
 
-    # 6) 其他未知物件，先保守保護
-    return "protected", False, "unknown_object"
+    # 8) 其他有文字框但不是命名內容框者，視為背景形狀
+    if has_text:
+        return "background", True, "decorative_shape_with_text_frame"
 
+    # 9) 其他未知物件，保守保護
+    return "protected", False, "unknown_object"
 
 for i, slide in enumerate(prs.slides, start=1):
     raw_shapes = []

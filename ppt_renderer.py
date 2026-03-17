@@ -1,11 +1,43 @@
 import os
 import time
+import json
 import shutil
 import win32com.client as win32
 from slide_registry import FLOW_TEMPLATE_INDEX, SLIDE_REGISTRY
 import pythoncom
 
 SLIDE_RENDERERS = {}
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_MAP_PATH = os.path.join(BASE_DIR, "template_map.json")
+
+def _load_template_map():
+    try:
+        with open(TEMPLATE_MAP_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+
+    slide_map = {}
+    for slide_info in data:
+        slide_index = slide_info.get("slide_index")
+        if not slide_index:
+            continue
+
+        by_name = {}
+        for shp in slide_info.get("shapes", []):
+            name = str(shp.get("name", "")).strip()
+            if not name:
+                continue
+            by_name[name.lower()] = shp
+
+        slide_map[int(slide_index)] = {
+            "detected_type": slide_info.get("detected_type"),
+            "shapes": by_name,
+        }
+    return slide_map
+
+TEMPLATE_ROLE_MAP = _load_template_map()
 
 MsoAutoSizeTextToFitShape = 2
 MsoTrue = -1
@@ -561,19 +593,80 @@ def _intersects(a, b) -> bool:
     l2, t2, r2, b2 = b
     return not (r1 <= l2 or r2 <= l1 or b1 <= t2 or b2 <= t1)
 
+def _get_slide_type_for_runtime_slide(slide):
+    try:
+        shape_names = set()
+        for i in range(1, slide.Shapes.Count + 1):
+            shp = slide.Shapes(i)
+            try:
+                shape_names.add(str(shp.Name).strip().lower())
+            except Exception:
+                pass
+
+        for slide_index, info in TEMPLATE_ROLE_MAP.items():
+            template_names = set(info.get("shapes", {}).keys())
+            if not template_names:
+                continue
+
+            # runtime slide 與 template slide 的命名 shape 有交集就視為同版型
+            if shape_names & template_names:
+                detected_type = info.get("detected_type")
+                if detected_type:
+                    return detected_type
+    except Exception:
+        pass
+    return None
+
+
+def _get_shape_role(slide, shape):
+    try:
+        slide_type = _get_slide_type_for_runtime_slide(slide)
+        if not slide_type:
+            return "protected"
+
+        for _, info in TEMPLATE_ROLE_MAP.items():
+            if info.get("detected_type") != slide_type:
+                continue
+
+            shp_meta = info.get("shapes", {}).get(str(shape.Name).strip().lower())
+            if shp_meta:
+                return shp_meta.get("role", "protected")
+    except Exception:
+        pass
+
+    return "protected"
+
+
+def _should_ignore_overlap(slide, other_shape):
+    role = _get_shape_role(slide, other_shape)
+    return role == "background"
+
 def _find_overlaps(slide, shape):
     overlaps = []
     target = _rect(shape)
 
     for i in range(1, slide.Shapes.Count + 1):
         other = slide.Shapes(i)
-        if other.Name == shape.Name:
+
+        try:
+            if other.Name == shape.Name:
+                continue
+        except Exception:
             continue
+
+        try:
+            # 背景物件直接忽略，不參與 overlap
+            if _should_ignore_overlap(slide, other):
+                continue
+        except Exception:
+            pass
+
         try:
             if _intersects(target, _rect(other)):
                 overlaps.append(other)
         except Exception:
             pass
+
     return overlaps
 
 def _resolve_overlap_or_fit(slide, shape, max_expand: float = 80.0):
@@ -588,10 +681,19 @@ def _resolve_overlap_or_fit(slide, shape, max_expand: float = 80.0):
 
         moved = False
         try:
-            if shape.Left > step:
-                shape.Left -= step / 2
-                shape.Width += step
+            if float(shape.Left) > step:
+                original_left = float(shape.Left)
+                original_width = float(shape.Width)
+
+                shape.Left = original_left - step / 2
+                shape.Width = original_width + step
                 moved = True
+
+                # 若擴張後反而更糟，就還原
+                if _find_overlaps(slide, shape):
+                    shape.Left = original_left
+                    shape.Width = original_width
+                    moved = False
         except Exception:
             pass
 
