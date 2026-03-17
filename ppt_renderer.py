@@ -124,7 +124,14 @@ def _set_wordwrap_and_autosize(shape, no_wrap: bool = False):
     except Exception:
         pass
 
-def _shrink_text_to_fit_shape(shape, min_font_size: float = 10.0, single_line: bool = False):
+def _shrink_text_to_fit_shape(
+    shape,
+    min_font_size: float = 10.0,
+    single_line: bool = False,
+):
+    """Reduce font size until text fits inside shape bounds.
+    If single_line=True, keep shrinking until text stays on one line.
+    """
     try:
         tr2 = shape.TextFrame2.TextRange
         if tr2.Length <= 0:
@@ -147,14 +154,14 @@ def _shrink_text_to_fit_shape(shape, min_font_size: float = 10.0, single_line: b
             except Exception:
                 break
 
-            fits = bw <= w and bh <= h
+            fits = (bw <= w and bh <= h)
 
             if single_line:
                 try:
                     line_count = tr2.Lines().Count
                 except Exception:
                     line_count = 1
-                fits = fits and line_count <= 1
+                fits = fits and (line_count <= 1)
 
             if fits:
                 break
@@ -472,7 +479,7 @@ def shape_by_name(slide, name: str):
             return shp
     return None
 
-def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_wrap: bool = False, ingle_line: bool = False,):
+def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_wrap: bool = False, single_line: bool = False,):
     
     shp = shape_by_name(slide, shape_name)
 
@@ -500,7 +507,7 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
     tr.Text = clean_text
 
     _set_wordwrap_and_autosize(shp, no_wrap=no_wrap)
-    _shrink_text_to_fit_shape(shp)
+    _shrink_text_to_fit_shape(shp, single_line = single_line)
     _clamp_shape_within_slide(slide, shp)
 
     # Keep text within textbox and avoid visual overflow when content is longer.
@@ -800,7 +807,7 @@ def render_content_2_a(slide, slide_spec):
 
     if shape_by_name(slide, "title"):
         keep_names.add("title")
-        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
 
     cards = slide_spec.get("cards", [])
 
@@ -880,7 +887,7 @@ def render_content_4_a(slide, slide_spec):
 
     if shape_by_name(slide, "title"):
         keep_names.add("title")
-        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
 
     cards = slide_spec.get("cards", [])
 
@@ -931,7 +938,7 @@ def render_content_4_b(slide, slide_spec):
 def render_content_3extra(slide, slide_spec):
     keep_names = {"title"}
 
-    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
     cards = slide_spec.get("cards", [])
 
     for i in range(1, 4):
@@ -955,7 +962,7 @@ def render_content_3extra(slide, slide_spec):
 def render_table_slide(slide, slide_spec):
     keep_names = {"title", "sheet_1"}
 
-    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
     fill_table(
         slide,
         "sheet_1",
@@ -970,7 +977,7 @@ def render_table_slide(slide, slide_spec):
 def render_flow(slide, slide_spec):
     keep_names = {"title"}
 
-    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+    set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
     steps = slide_spec.get("steps", [])
 
     prefer_name = _resolve_flow_prefer_name(slide, slide_spec)
@@ -1005,7 +1012,7 @@ def render_content_image(slide, slide_spec):
 
     if shape_by_name(slide, "title"):
         keep_names.add("title")
-        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True)
+        set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
 
     if shape_by_name(slide, "content"):
         keep_names.add("content")
