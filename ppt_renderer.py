@@ -45,7 +45,7 @@ MsoFalse = 0
 
 
 def _fit_text_to_shape(shape):
-    """Best-effort: keep text inside the textbox instead of overflowing."""
+    """Keep text inside existing textbox bounds; never enlarge the textbox."""
     try:
         shape.TextFrame2.WordWrap = MsoTrue
         shape.TextFrame2.AutoSize = MsoAutoSizeTextToFitShape
@@ -55,7 +55,6 @@ def _fit_text_to_shape(shape):
 
     try:
         shape.TextFrame.WordWrap = MsoTrue
-        shape.TextFrame.AutoSize = 1
     except Exception:
         pass
 
@@ -116,18 +115,36 @@ def choose_flow_variant(slide_spec: dict) -> str:
     return "flow_chart_1"
 
 
-def _resolve_flow_prefer_name(slide, slide_spec: dict) -> str | None:
-    candidate = choose_flow_variant(slide_spec)
+def _resolve_overlap_or_fit(slide, shape, min_font_size: float = 9.0, single_line: bool = False):
+    """
+    Do not expand/move placeholders.
+    Only shrink text within the existing textbox until it fits visually.
+    """
+    try:
+        tr2 = shape.TextFrame2.TextRange
+    except Exception:
+        tr2 = None
 
-    for name in (candidate, "flow_chart_1", "flow_chart_2", "flow_chart_3"):
-        shp = shape_by_name(slide, name)
+    for _ in range(40):
         try:
-            if shp is not None and getattr(shp, "HasSmartArt", False):
-                return name
+            overlaps = _find_overlaps(slide, shape)
         except Exception:
-            pass
+            overlaps = []
 
-    return None
+        if not overlaps:
+            return
+
+        try:
+            if tr2 is None or tr2.Length <= 0:
+                return
+
+            current_size = float(tr2.Font.Size)
+            if current_size <= min_font_size:
+                return
+
+            tr2.Font.Size = current_size - 0.5
+        except Exception:
+            return
 
 
 def _find_template_slide_index_by_shape(src_pres, shape_name: str) -> int | None:
@@ -146,15 +163,18 @@ def _find_template_slide_index_by_shape(src_pres, shape_name: str) -> int | None
 
 def _set_wordwrap_and_autosize(shape, no_wrap: bool = False):
     wrap = MsoFalse if no_wrap else MsoTrue
+
     try:
         shape.TextFrame2.WordWrap = wrap
         shape.TextFrame2.AutoSize = MsoAutoSizeTextToFitShape
     except Exception:
         pass
+
     try:
         shape.TextFrame.WordWrap = bool(not no_wrap)
     except Exception:
         pass
+    
 
 def _shrink_text_to_fit_shape(
     shape,
@@ -544,10 +564,11 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
 
     # Keep text within textbox and avoid visual overflow when content is longer.
     _fit_text_to_shape(shp)
-    _clamp_shape_within_slide(slide, shp)
-    
-    _fit_text_to_shape(shp)
-    _resolve_overlap_or_fit(slide, shp)
+    _resolve_overlap_or_fit(
+        slide,
+        shp,
+        single_line=single_line
+    )
     _clamp_shape_within_slide(slide, shp)
 
     if bold is not None:
@@ -855,6 +876,52 @@ def detect_slide_text_color(slide):
             return 16777215 # white
     except:
         return 0
+
+
+def _resolve_flow_prefer_name(slide, slide_spec):
+    """
+    Decide which flow smartart placeholder to use.
+
+    Priority:
+    1. explicit prefer_name in slide_spec
+    2. explicit flow_variant in slide_spec
+    3. detect existing flow_chart_* shape on current slide
+    4. fallback by step count
+    """
+    prefer_name = str(slide_spec.get("prefer_name", "")).strip()
+    if prefer_name:
+        return prefer_name
+
+    flow_variant = str(slide_spec.get("flow_variant", "")).strip()
+    if flow_variant in {"flow_chart_1", "flow_chart_2", "flow_chart_3"}:
+        return flow_variant
+
+    # Detect by existing shape names on this slide
+    try:
+        existing_names = set()
+        for i in range(1, slide.Shapes.Count + 1):
+            shp = slide.Shapes(i)
+            try:
+                existing_names.add(str(shp.Name).strip().lower())
+            except Exception:
+                pass
+
+        for candidate in ("flow_chart_1", "flow_chart_2", "flow_chart_3"):
+            if candidate.lower() in existing_names:
+                return candidate
+    except Exception:
+        pass
+
+    # Fallback by number of steps
+    steps = slide_spec.get("steps", []) or []
+    step_count = len(steps)
+
+    if step_count <= 3:
+        return "flow_chart_1"
+    elif step_count <= 5:
+        return "flow_chart_2"
+    else:
+        return "flow_chart_3"
 
 @register_renderer("cover")
 def render_cover(slide, slide_spec):

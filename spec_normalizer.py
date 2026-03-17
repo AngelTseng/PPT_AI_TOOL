@@ -96,6 +96,73 @@ def _pick_content_3_variant(counter: int) -> str:
     variants = ["content_3extra", "content_3extra_image"]
     return variants[counter % len(variants)]
 
+def _has_real_image_hint(slide: dict) -> bool:
+    image = _clean_text(slide.get("image", ""))
+    image_url = _clean_text(slide.get("image_url", ""))
+    image_path = _clean_text(slide.get("image_path", ""))
+    return bool(image or image_url or image_path)
+
+
+def _rebalance_single_content_variants(slides: list[dict]) -> list[dict]:
+    """
+    For one-content family:
+    - pure text single page -> content_text (slide 10)
+    - multiple pages -> alternate content_text / content_image
+    """
+    idxs = []
+    for i, s in enumerate(slides):
+        if s.get("type") in {"content", "content_1", "content_text", "content_image"}:
+            idxs.append(i)
+
+    if not idxs:
+        return slides
+
+    if len(idxs) == 1:
+        i = idxs[0]
+        slide = slides[i]
+        if _has_real_image_hint(slide):
+            slides[i]["type"] = "content_image"
+        else:
+            slides[i]["type"] = "content_text"
+        return slides
+
+    # 多頁時交替使用 slide 10 / slide 9
+    for order, i in enumerate(idxs):
+        slide = slides[i]
+        if order % 2 == 0:
+            slide["type"] = "content_text"   # slide 10 first
+        else:
+            slide["type"] = "content_image"  # slide 9 second
+
+    return slides
+
+def _rebalance_content_3_variants(slides: list[dict]) -> list[dict]:
+    """
+    For 3-card family:
+    - if there are multiple slides, alternate content_3extra_image / content_3extra
+    so slide 4 and slide 5 are both used.
+    """
+    idxs = []
+    for i, s in enumerate(slides):
+        if s.get("type") in {"content_3", "content_3extra", "content_3extra_image"}:
+            idxs.append(i)
+
+    if not idxs:
+        return slides
+
+    if len(idxs) == 1:
+        i = idxs[0]
+        if slides[i].get("type") == "content_3":
+            slides[i]["type"] = "content_3extra"
+        return slides
+
+    for order, i in enumerate(idxs):
+        if order % 2 == 0:
+            slides[i]["type"] = "content_3extra_image"  # slide 4
+        else:
+            slides[i]["type"] = "content_3extra"        # slide 5
+
+    return slides
 
 def normalize_beautified_spec(spec: dict) -> dict:
     slides = spec.get("slides", [])
@@ -137,6 +204,21 @@ def normalize_beautified_spec(spec: dict) -> dict:
                     "type": "section",
                     "name": section_name
                 })
+
+        elif t in {"content", "content_1"}:
+            content = _expand_short_text(slide.get("content", ""))
+            if not content:
+                items = [_clean_text(x) for x in slide.get("items", []) if _clean_text(x)]
+                content = "\n".join(items)
+
+            normalized.append({
+                "type": "content_text",  # 先給預設，後面 rebalance 還會再調整
+                "title": _clean_text(slide.get("title", "")) or "重點說明",
+                "content": content or "N/A",
+                "image": _clean_text(slide.get("image", "")),
+                "image_url": _clean_text(slide.get("image_url", "")),
+                "image_path": _clean_text(slide.get("image_path", "")),
+            })
 
         elif t in content_2_types:
             cards = slide.get("cards")
@@ -219,5 +301,7 @@ def normalize_beautified_spec(spec: dict) -> dict:
         else:
             normalized.append(slide)
 
+    normalized = _rebalance_single_content_variants(normalized)
+    normalized = _rebalance_content_3_variants(normalized)
     normalized = _ensure_cover_and_end(normalized)
     return {"slides": normalized}
