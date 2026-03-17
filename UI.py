@@ -2,6 +2,8 @@ import json
 import os
 import tempfile
 import traceback
+import win32com.client as win32
+import pythoncom
 from datetime import datetime
 from pathlib import Path
 
@@ -14,6 +16,13 @@ from spec_normalizer import normalize_beautified_spec
 from spec_validator import validate_deck_spec
 from ppt_renderer import render_deck
 
+import platform
+
+def ensure_windows_environment():
+    if platform.system() != "Windows":
+        st.error("This app requires Windows for PowerPoint COM rendering.")
+        st.stop()
+        
 
 # =========================
 # Basic config
@@ -330,6 +339,8 @@ if mode == "Generate from prompt":
 
                 show_warnings(result["normalized_spec"])
 
+                
+                
                 runner.update("Rendering PPT", kind="ok")
                 out_path = OUTPUT_DIR / f"generated_{timestamp_str()}.pptx"
                 run_with_spinner(
@@ -373,6 +384,8 @@ if mode == "Generate from prompt":
         st.session_state.generate_result = None
         st.rerun()
                             
+                            
+
 # =========================
 # Mode 2: Beautify existing PPT
 # =========================
@@ -435,6 +448,8 @@ elif mode == "Beautify existing PPT":
                     raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
 
                 show_warnings(result["normalized_spec"])
+                
+                
 
                 runner.update("Rendering PPT", kind="ok")
                 output_pptx = OUTPUT_DIR / f"beautified_{timestamp_str()}.pptx"
@@ -539,6 +554,8 @@ elif mode == "Render from spec JSON":
                     pretty_json_block("Normalized spec", result["normalized_spec"])
 
                 show_warnings(result["normalized_spec"])
+                
+                
 
                 runner.update("Rendering PPT", kind="ok")
                 output_pptx = OUTPUT_DIR / f"spec_rendered_{timestamp_str()}.pptx"

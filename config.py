@@ -2,4 +2,6 @@
 
 import os
 
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+# Model name passed to the OpenAI-compatible client.
+# In current setup, this project uses Gemini's OpenAI-compatible endpoint.
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gemini-3-flash-preview")

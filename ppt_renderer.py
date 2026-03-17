@@ -5,6 +5,7 @@ import shutil
 import win32com.client as win32
 from slide_registry import FLOW_TEMPLATE_INDEX, SLIDE_REGISTRY
 import pythoncom
+from com_utils import com_session
 
 SLIDE_RENDERERS = {}
 
@@ -43,21 +44,23 @@ MsoAutoSizeTextToFitShape = 2
 MsoTrue = -1
 MsoFalse = 0
 
-
 def _fit_text_to_shape(shape):
-    """Keep text inside existing textbox bounds; never enlarge the textbox."""
+    """
+    Wrap text but keep original template font size.
+    Shrinking is handled later.
+    """
     try:
-        shape.TextFrame2.WordWrap = MsoTrue
-        shape.TextFrame2.AutoSize = MsoAutoSizeTextToFitShape
-        return
+        tf2 = shape.TextFrame2
+        tf2.WordWrap = MsoTrue
+        tf2.AutoSize = 0
     except Exception:
         pass
 
     try:
-        shape.TextFrame.WordWrap = MsoTrue
+        tf = shape.TextFrame
+        tf.WordWrap = True
     except Exception:
         pass
-
 
 def _clamp_shape_within_slide(slide, shape):
     """If a shape is moved outside the page bounds, clamp it back."""
@@ -135,7 +138,8 @@ def _set_wordwrap_and_autosize(shape, no_wrap: bool = False):
 
     try:
         shape.TextFrame2.WordWrap = wrap
-        shape.TextFrame2.AutoSize = MsoAutoSizeTextToFitShape
+        # 不要一開始就強制 TextToFitShape
+        shape.TextFrame2.AutoSize = 0
     except Exception:
         pass
 
@@ -500,7 +504,7 @@ def shape_by_name(slide, name: str):
             return shp
     return None
 
-def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_wrap: bool = False, single_line: bool = False,):
+def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_wrap: bool = False, single_line: bool = False,prefer_template_size=True,):
     
     shp = shape_by_name(slide, shape_name)
 
@@ -528,7 +532,6 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
     tr.Text = clean_text
 
     _set_wordwrap_and_autosize(shp, no_wrap=no_wrap)
-    _shrink_text_to_fit_shape(shp, single_line = single_line)
     _clamp_shape_within_slide(slide, shp)
 
     # Keep text within textbox and avoid visual overflow when content is longer.
@@ -537,6 +540,7 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
         slide,
         shp,
     )
+    _shrink_text_to_fit_shape(shp, single_line = single_line)
     _clamp_shape_within_slide(slide, shp)
 
     if bold is not None:
@@ -768,13 +772,11 @@ def delete_all_slides(pres):
         pres.Slides(i).Delete()
 
 def fill_table(slide, table_name: str, columns, rows):
-    
     if not columns:
         print("[WARN] Table columns empty.")
         return False
-    
+
     shp = shape_by_name(slide, table_name)
-    
     if shp is None:
         print(f"[WARN] Table shape not found: {table_name}")
         return False
@@ -785,12 +787,20 @@ def fill_table(slide, table_name: str, columns, rows):
             return False
 
         tbl = shp.Table
-        need_rows = 1 + len(rows)   # header + body
+        need_rows = 1 + len(rows)
         need_cols = len(columns)
 
         ok_rows, ok_cols = ensure_table_size_safe(tbl, need_rows, need_cols)
         if not ok_rows or not ok_cols:
             print(f"[WARN] Table resize incomplete: rows_ok={ok_rows}, cols_ok={ok_cols}")
+
+        # 先清空整張表目前可存取的文字
+        for r in range(1, tbl.Rows.Count + 1):
+            for c in range(1, tbl.Columns.Count + 1):
+                try:
+                    tbl.Cell(r, c).Shape.TextFrame.TextRange.Text = ""
+                except Exception:
+                    pass
 
         # header
         for c, text in enumerate(columns, start=1):
@@ -819,7 +829,7 @@ def fill_table(slide, table_name: str, columns, rows):
     except Exception as e:
         print(f"[WARN] Fill table failed ({table_name}): {e}")
         return False
-    
+ 
 def rgb_to_tuple(rgb):
     r = rgb & 255
     g = (rgb >> 8) & 255
@@ -1192,46 +1202,43 @@ def get_template_slide_index(slide_type, src_pres, slide_spec=None):
     return idx
 
 def render_deck(template_pptx: str, deck_spec: dict, out_pptx: str):
-    pythoncom.CoInitialize()
+    with com_session():
+        app = None
+        src = None
+        dst = None
 
-    app = None
-    src = None
-    dst = None
+        try:
+            app = win32.Dispatch("PowerPoint.Application")
+            app.Visible = True
 
-    try:
-        app = win32.Dispatch("PowerPoint.Application")
-        app.Visible = True
+            work_pptx = os.path.abspath(out_pptx)
+            shutil.copyfile(template_pptx, work_pptx)
 
-        work_pptx = os.path.abspath(out_pptx)
-        shutil.copyfile(template_pptx, work_pptx)
+            src = app.Presentations.Open(os.path.abspath(template_pptx), WithWindow=False)
+            dst = app.Presentations.Open(work_pptx, WithWindow=False)
 
-        src = app.Presentations.Open(os.path.abspath(template_pptx), WithWindow=False)
-        dst = app.Presentations.Open(work_pptx, WithWindow=False)
+            delete_all_slides(dst)
 
-        delete_all_slides(dst)
+            slides = deck_spec.get("slides", [])
 
-        slides = deck_spec.get("slides", [])
+            for idx, slide_spec in enumerate(slides, start=1):
+                slide_type = slide_spec.get("type")
+                if slide_type not in SLIDE_REGISTRY:
+                    print(f"[WARN] Skip unsupported slide type: {slide_type}")
+                    continue
 
-        for idx, slide_spec in enumerate(slides, start=1):
-            slide_type = slide_spec.get("type")
-            if slide_type not in SLIDE_REGISTRY:
-                print(f"[WARN] Skip unsupported slide type: {slide_type}")
-                continue
+                src_idx = get_template_slide_index(slide_type, src, slide_spec)
+                src_slide = src.Slides(src_idx)
 
-            src_idx = get_template_slide_index(slide_type, src, slide_spec)
-            src_slide = src.Slides(src_idx)
+                new_slide = duplicate_to_presentation(src_slide, dst)
+                render_slide(new_slide, slide_spec)
 
-            new_slide = duplicate_to_presentation(src_slide, dst)
-            render_slide(new_slide, slide_spec)
+            dst.Save()
 
-        dst.Save()
-
-    finally:
-        if src is not None:
-            src.Close()
-        if dst is not None:
-            dst.Close()
-        if app is not None:
-            app.Quit()
-
-        pythoncom.CoUninitialize()
+        finally:
+            if src is not None:
+                src.Close()
+            if dst is not None:
+                dst.Close()
+            if app is not None:
+                app.Quit()

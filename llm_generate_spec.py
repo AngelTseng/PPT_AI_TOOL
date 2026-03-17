@@ -1,11 +1,12 @@
 import json
+import os
 from pathlib import Path
-from openai import OpenAI
 
 from config import OPENAI_MODEL
 from slide_registry import SLIDE_REGISTRY
+from llm_client import build_llm_client
 
-client = OpenAI()
+client = build_llm_client()
 
 BASE_DIR = Path(__file__).resolve().parent
 SUPPORTED_SLIDE_TYPES = list(SLIDE_REGISTRY.keys())
@@ -101,6 +102,14 @@ DECK_SPEC_SCHEMA = {
                         {
                             "if": {"properties": {"type": {"const": "content_image"}}},
                             "then": {"required": ["type", "title", "content"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"const": "content_text"}}},
+                            "then": {"required": ["type", "title", "content"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"const": "content_3extra_image"}}},
+                            "then": {"required": ["type", "title", "cards"]}
                         },
                         {
                             "if": {"properties": {"type": {"const": "content_3extra"}}},
@@ -212,8 +221,11 @@ Slide usage guidance:
 - Use flow for processes, sequences, collaboration stages, development lifecycle, or learning paths.
 - Use section to break major topics and improve presentation rhythm.
 - Use content_image for one key visual + one concise explanation.
-- If a slide has only one core idea/content block, prefer content_image as the one-content slide (do not force into content_2/content_3extra/content_4).
-
+- Use content_text for one key text-only message with one supporting paragraph.
+- If a slide has only one core idea/content block:
+  - prefer content_image when there is a real image or image-oriented layout
+  - prefer content_text when it is text-only
+  
 Content quality rules:
 - section.name must always be non-empty and explicit.
 - For content cards, avoid single short phrases; each content should be 1 concise sentence (about 18-40 chars in Chinese or 8-20 words in English).

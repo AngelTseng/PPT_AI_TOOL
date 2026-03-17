@@ -1,11 +1,13 @@
 import json
+import os
 from pathlib import Path
 from openai import OpenAI
 
 from config import OPENAI_MODEL
 from slide_registry import SLIDE_REGISTRY
+from llm_client import build_llm_client
 
-client = OpenAI()
+client = build_llm_client()
 
 BASE_DIR = Path(__file__).resolve().parent
 SUPPORTED_SLIDE_TYPES = list(SLIDE_REGISTRY.keys())
@@ -102,6 +104,14 @@ BEAUTIFY_SCHEMA = {
                         {
                             "if": {"properties": {"type": {"const": "content_image"}}},
                             "then": {"required": ["type", "title", "content"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"const": "content_text"}}},
+                            "then": {"required": ["type", "title", "content"]}
+                        },
+                        {
+                            "if": {"properties": {"type": {"const": "content_3extra_image"}}},
+                            "then": {"required": ["type", "title", "cards"]}
                         },
                         {
                             "if": {"properties": {"type": {"const": "content_3extra"}}},

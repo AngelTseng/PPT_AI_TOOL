@@ -3,6 +3,8 @@ import os
 import win32com.client as win32
 import pythoncom
 
+from com_utils import com_session
+
 
 def shape_by_name(slide, name: str):
     for i in range(1, slide.Shapes.Count + 1):
@@ -227,6 +229,16 @@ def detect_slide_type(slide) -> str:
     if shape_by_name(slide, "title") and shape_by_name(slide, "content") and shape_by_name(slide, "img"):
         return "content_image"
 
+    # content_text
+    if (
+        shape_by_name(slide, "title")
+        and shape_by_name(slide, "content")
+        and not shape_by_name(slide, "img")
+        and not shape_by_name(slide, "img_1")
+        and not shape_by_name(slide, "main_image")
+    ):
+        return "content_text"
+
     # content_4 variants
     if shape_by_name(slide, "content_1") and shape_by_name(slide, "content_2") and shape_by_name(slide, "content_3") and shape_by_name(slide, "content_4"):
         if shape_by_name(slide, "item_1") and shape_by_name(slide, "item_2") and shape_by_name(slide, "item_3") and shape_by_name(slide, "item_4"):
@@ -353,6 +365,13 @@ def extract_content_image(slide):
         "images": extract_images(slide),
     }
 
+def extract_content_text(slide):
+    return {
+        "type": "content_text",
+        "title": get_text_from_shape(slide, "title"),
+        "content": get_text_from_shape(slide, "content"),
+    }
+
 def extract_table(slide):
     columns, rows = get_table_data(slide, "sheet_1")
     return {
@@ -419,6 +438,8 @@ def extract_slide(slide):
         return extract_content_4(slide, slide_type)
     elif slide_type == "content_image":
         return extract_content_image(slide)
+    elif slide_type == "content_text":
+        return extract_content_text(slide)
     elif slide_type == "table":
         return extract_table(slide)
     
@@ -428,34 +449,31 @@ def extract_slide(slide):
         return extract_unknown(slide)
 
 def extract_ppt_to_spec(input_pptx: str) -> dict:
-    pythoncom.CoInitialize()
+    with com_session():
+        app = None
+        pres = None
 
-    app = None
-    pres = None
+        try:
+            app = win32.Dispatch("PowerPoint.Application")
+            app.Visible = True
 
-    try:
-        app = win32.Dispatch("PowerPoint.Application")
-        app.Visible = True
+            pres = app.Presentations.Open(os.path.abspath(input_pptx), WithWindow=False)
 
-        pres = app.Presentations.Open(os.path.abspath(input_pptx), WithWindow=False)
+            slides = []
+            for i in range(1, pres.Slides.Count + 1):
+                slide = pres.Slides(i)
+                slides.append(extract_slide(slide))
 
-        slides = []
-        for i in range(1, pres.Slides.Count + 1):
-            slide = pres.Slides(i)
-            slides.append(extract_slide(slide))
+            return {"slides": slides}
 
-        return {"slides": slides}
-
-    finally:
-        if pres is not None:
-            pres.Close()
-        if app is not None:
-            app.Quit()
-
-        pythoncom.CoUninitialize()
-
+        finally:
+            if pres is not None:
+                pres.Close()
+            if app is not None:
+                app.Quit()
+                
+                
 import sys
-
 
 def main():
     

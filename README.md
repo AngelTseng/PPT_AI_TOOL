@@ -137,16 +137,16 @@ From `requirements.txt`:
 ## 6) Environment Variables
 
 Required:
-- `OPENAI_API_KEY`
+- GEMINI_API_KEY
 
 Optional:
-- `OPENAI_MODEL` (default in `config.py`: `gpt-4.1-mini`)
+- OPENAI_MODEL (default in `config.py`: `gemini-3-flash-preview`)
 
 PowerShell example:
 
 ```powershell
-$env:OPENAI_API_KEY="sk-..."
-$env:OPENAI_MODEL="gpt-4.1-mini"
+set GEMINI_API_KEY=your-gemini-key
+set OPENAI_MODEL=gemini-3-flash-preview
 ```
 
 CMD example:
