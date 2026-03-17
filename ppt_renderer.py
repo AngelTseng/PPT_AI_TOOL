@@ -115,37 +115,6 @@ def choose_flow_variant(slide_spec: dict) -> str:
     return "flow_chart_1"
 
 
-def _resolve_overlap_or_fit(slide, shape, min_font_size: float = 9.0, single_line: bool = False):
-    """
-    Do not expand/move placeholders.
-    Only shrink text within the existing textbox until it fits visually.
-    """
-    try:
-        tr2 = shape.TextFrame2.TextRange
-    except Exception:
-        tr2 = None
-
-    for _ in range(40):
-        try:
-            overlaps = _find_overlaps(slide, shape)
-        except Exception:
-            overlaps = []
-
-        if not overlaps:
-            return
-
-        try:
-            if tr2 is None or tr2.Length <= 0:
-                return
-
-            current_size = float(tr2.Font.Size)
-            if current_size <= min_font_size:
-                return
-
-            tr2.Font.Size = current_size - 0.5
-        except Exception:
-            return
-
 
 def _find_template_slide_index_by_shape(src_pres, shape_name: str) -> int | None:
     for i in range(1, src_pres.Slides.Count + 1):
@@ -567,7 +536,6 @@ def set_text(slide, shape_name: str, text: str, bold=None, auto_color=False, no_
     _resolve_overlap_or_fit(
         slide,
         shp,
-        single_line=single_line
     )
     _clamp_shape_within_slide(slide, shp)
 
@@ -690,41 +658,38 @@ def _find_overlaps(slide, shape):
 
     return overlaps
 
-def _resolve_overlap_or_fit(slide, shape, max_expand: float = 80.0):
-    # 先左右擴張
-    step = 6.0
-    expanded = 0.0
+def _resolve_overlap_or_fit(slide, shape, min_font_size: float = 9.0, single_line: bool = False):
+    """
+    Keep placeholders fixed and resolve text overlap by shrinking text only.
+    This prevents textbox expansion from creating new overlaps.
+    """
+    try:
+        tr2 = shape.TextFrame2.TextRange
+    except Exception:
+        tr2 = None
 
-    while expanded < max_expand:
+    for _ in range(60):
         overlaps = _find_overlaps(slide, shape)
         if not overlaps:
             return
 
-        moved = False
+        if tr2 is None:
+            return
+
         try:
-            if float(shape.Left) > step:
-                original_left = float(shape.Left)
-                original_width = float(shape.Width)
+            if tr2.Length <= 0:
+                return
 
-                shape.Left = original_left - step / 2
-                shape.Width = original_width + step
-                moved = True
+            current_size = float(tr2.Font.Size)
+            if current_size <= min_font_size:
+                return
 
-                # 若擴張後反而更糟，就還原
-                if _find_overlaps(slide, shape):
-                    shape.Left = original_left
-                    shape.Width = original_width
-                    moved = False
+            tr2.Font.Size = current_size - 0.5
         except Exception:
-            pass
+            return
 
-        if not moved:
-            break
-
-        expanded += step
-
-    # 再縮字
-    _shrink_text_to_fit_shape(shape)
+        # Ensure the shrunken text also fits in the textbox.
+        _shrink_text_to_fit_shape(shape, min_font_size=min_font_size, single_line=single_line)
 
 def delete_unupdated_content_shapes(slide, slide_type: str, keep_names: set[str]):
     deletable_names = CONTENT_CLEANUP_NAMES.get(slide_type, set())
