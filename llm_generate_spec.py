@@ -1,15 +1,12 @@
 import json
-import os
 from pathlib import Path
+from openai import OpenAI
 
-from config import OPENAI_MODEL
-from slide_registry import SLIDE_REGISTRY
-from llm_client import build_llm_client
+client = OpenAI()
 
-client = build_llm_client()
+MODEL = "gpt-4.1-mini"
 
 BASE_DIR = Path(__file__).resolve().parent
-SUPPORTED_SLIDE_TYPES = list(SLIDE_REGISTRY.keys())
 TEMPLATE_MAP_PATH = BASE_DIR / "template_map.json"
 
 
@@ -26,12 +23,21 @@ DECK_SPEC_SCHEMA = {
                     "properties": {
                         "type": {
                             "type": "string",
-                            "enum": SUPPORTED_SLIDE_TYPES
+                            "enum": [
+                                "cover",
+                                "agenda",
+                                "section",
+                                "content_2",
+                                "content_3extra",
+                                "content_4",
+                                "table",
+                                "flow",
+                                "end"
+                            ]
                         },
                         "topic": {"type": "string"},
                         "speaker": {"type": "string"},
                         "title": {"type": "string"},
-                        "content": {"type": "string"},
                         "items": {
                             "type": "array",
                             "items": {"type": "string"},
@@ -84,31 +90,11 @@ DECK_SPEC_SCHEMA = {
                             "then": {"required": ["type", "name"]}
                         },
                         {
-                            "if": {"properties": {"type": {"enum": ["content_2", "content_2_a"]}}},
+                            "if": {"properties": {"type": {"const": "content_2"}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
-                            "if": {"properties": {"type": {"enum": ["content_2_b", "content_2_c"]}}},
-                            "then": {"required": ["type", "cards"]}
-                        },
-                        {
-                            "if": {"properties": {"type": {"enum": ["content_4", "content_4_a"]}}},
-                            "then": {"required": ["type", "title", "cards"]}
-                        },
-                        {
-                            "if": {"properties": {"type": {"enum": ["content_4_b"]}}},
-                            "then": {"required": ["type", "cards"]}
-                        },
-                        {
-                            "if": {"properties": {"type": {"const": "content_image"}}},
-                            "then": {"required": ["type", "title", "content"]}
-                        },
-                        {
-                            "if": {"properties": {"type": {"const": "content_text"}}},
-                            "then": {"required": ["type", "title", "content"]}
-                        },
-                        {
-                            "if": {"properties": {"type": {"const": "content_3extra_image"}}},
+                            "if": {"properties": {"type": {"const": "content_4"}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
@@ -174,20 +160,18 @@ Supported slide types:
 - cover
 - agenda
 - section
-- content_2 / content_2_a / content_2_b / content_2_c
+- content_2
 - content_3extra
-- content_image
-- content_4 / content_4_a / content_4_b
+- content_4
 - table
 - flow
 - end
 
 Rules:
 - agenda.items: max 5
-- content_2/content_2_a/content_2_b/content_2_c.cards: max 2
+- content_2.cards: max 2
 - content_3extra.cards: max 3
-- content_4/content_4_a/content_4_b.cards: max 4
-- content_image requires title + content
+- content_4.cards: max 4
 - flow.steps: at least 2
 - table.columns must not be empty
 - table.rows must not be empty
@@ -220,24 +204,12 @@ Slide usage guidance:
 - Use table for comparisons, specifications, structured facts, grouped responsibilities, categories, or tool/capability summaries.
 - Use flow for processes, sequences, collaboration stages, development lifecycle, or learning paths.
 - Use section to break major topics and improve presentation rhythm.
-- Use content_image for one key visual + one concise explanation.
-- Use content_text for one key text-only message with one supporting paragraph.
-- If a slide has only one core idea/content block:
-  - prefer content_image when there is a real image or image-oriented layout
-  - prefer content_text when it is text-only
-  
-Content quality rules:
-- section.name must always be non-empty and explicit.
-- For content cards, avoid single short phrases; each content should be 1 concise sentence (about 18-40 chars in Chinese or 8-20 words in English).
-- For content_image.content, write at least one complete concise sentence (about 24+ chars in Chinese or 12+ words in English).
-- For flow.steps, each step should be descriptive (not just 1-2 words).
 
 Layout adaptation rules:
 - If content naturally fits 2 grouped ideas, prefer content_2 instead of forcing it into content_3extra.
 - If content naturally fits 4 grouped ideas, prefer content_4 or table instead of forcing it into content_3extra.
 - Only use content_3extra when the content truly fits a 3-point grouped layout.
 - If a slide looks like a chapter heading or transition, use section.
-- If a slide has a single key message with one supporting paragraph, prefer content_image over multi-card layouts.
 - If content is too long for one slide, split it into multiple slides when needed.
 
 Section coverage rules:
@@ -291,7 +263,11 @@ Use the template structure to choose appropriate slide types and content layout.
 """
 
 def sanitize_slides(spec: dict) -> dict:
-    allowed = set(SUPPORTED_SLIDE_TYPES)
+    allowed = {
+        "cover", "agenda", "section",
+        "content_2", "content_3extra", "content_4",
+        "table", "flow", "end"
+    }
 
     slides = spec.get("slides", [])
     cleaned = []
@@ -312,7 +288,7 @@ def generate_spec(user_prompt: str) -> dict:
 
     try:
         resp = client.chat.completions.create(
-            model=OPENAI_MODEL,
+            model=MODEL,
             messages=[
                 {"role": "developer", "content": developer_prompt},
                 {"role": "user", "content": user_prompt},
@@ -355,3 +331,4 @@ def generate_spec(user_prompt: str) -> dict:
 
     except Exception as e:
         raise RuntimeError(f"Failed to generate deck spec: {e}")
+

@@ -2,27 +2,20 @@ import json
 import os
 import tempfile
 import traceback
-import win32com.client as win32
-import pythoncom
 from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
 
 from llm_generate_spec import generate_spec
-from llm_beautify_spec import beautify_spec
 from extract_ppt_content import extract_ppt_to_spec
 from spec_normalizer import normalize_beautified_spec
 from spec_validator import validate_deck_spec
 from ppt_renderer import render_deck
+from rule_based_transform import rule_based_transform_spec
+from llm_beautify_spec import rewrite_overflow_fields_with_llm
 
-import platform
-
-def ensure_windows_environment():
-    if platform.system() != "Windows":
-        st.error("This app requires Windows for PowerPoint COM rendering.")
-        st.stop()
-        
+import platform     
 
 # =========================
 # Basic config
@@ -110,34 +103,9 @@ def read_file_bytes(path: Path) -> bytes:
     with open(path, "rb") as f:
         return f.read()
 
-
-def render_from_spec(spec: dict, output_name_prefix: str = "output") -> tuple[dict, Path]:
-    """
-    normalize -> validate -> render
-    returns: (normalized_spec, output_pptx_path)
-    """
-    normalized_spec = normalize_beautified_spec(spec)
-    result = validate_deck_spec(normalized_spec)
-
-    if result["errors"]:
-        raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
-
-    out_path = OUTPUT_DIR / f"{output_name_prefix}_{timestamp_str()}.pptx"
-
-    render_deck(
-        template_pptx=str(TEMPLATE_PATH),
-        deck_spec=result["normalized_spec"],
-        out_pptx=str(out_path)
-    )
-
-    return result["normalized_spec"], out_path
-
-
-def show_warnings(spec: dict):
-    result = validate_deck_spec(spec)
+def show_warnings(result: dict):
     if result["warnings"]:
         st.warning("Warnings:\n\n" + "\n".join(f"- {w}" for w in result["warnings"]))
-
 
 def pretty_json_block(title: str, data: dict):
     with st.expander(title, expanded=False):
@@ -337,7 +305,7 @@ if mode == "Generate from prompt":
                 if result["errors"]:
                     raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
 
-                show_warnings(result["normalized_spec"])
+                show_warnings(result)
 
                 
                 
@@ -392,6 +360,8 @@ if mode == "Generate from prompt":
 
 elif mode == "Beautify existing PPT":
     st.subheader("Mode 2 · Beautify an existing PPT")
+    
+    job_id = timestamp_str()
 
     uploaded_ppt = st.file_uploader(
         "Upload a PPTX file",
@@ -411,9 +381,9 @@ elif mode == "Beautify existing PPT":
             st.error("Please upload a PPTX file first.")
         else:
             try:
-                runner = StepRunner("Beautifying presentation...", total_steps=5, show_logs=show_logs)
+                runner = StepRunner("Beautifying presentation...", total_steps=7, show_logs=show_logs)
 
-                input_ppt_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_ppt.name}"
+                input_ppt_path = OUTPUT_DIR / f"uploaded_{job_id}_{uploaded_ppt.name}"
                 save_uploaded_file(uploaded_ppt, input_ppt_path)
 
                 runner.update("Extracting content from uploaded PPT")
@@ -423,23 +393,27 @@ elif mode == "Beautify existing PPT":
                     str(input_ppt_path)
                 )
 
-                if show_debug:
-                    pretty_json_block("Extracted spec", extracted_spec)
-
-                runner.update("Beautifying spec with LLM")
-                beautified_spec = run_with_spinner(
-                    "LLM is improving your presentation structure...",
-                    beautify_spec,
+                runner.update("Transforming slides with rules")
+                transformed_spec = run_with_spinner(
+                    "Applying rule-based slide transformation...",
+                    rule_based_transform_spec,
                     extracted_spec
                 )
 
-                if show_debug:
-                    pretty_json_block("Beautified spec", beautified_spec)
+                runner.update("Refining text with LLM")
+                rewritten_spec = run_with_spinner(
+                    "Refining slide text...",
+                    rewrite_overflow_fields_with_llm,
+                    transformed_spec
+                )
 
                 runner.update("Normalizing spec")
-                normalized_spec = normalize_beautified_spec(beautified_spec)
+                normalized_spec = normalize_beautified_spec(rewritten_spec)
 
                 if show_debug:
+                    pretty_json_block("Extracted spec", extracted_spec)
+                    pretty_json_block("Rule-transformed spec", transformed_spec)
+                    pretty_json_block("LLM-rewritten spec", rewritten_spec)
                     pretty_json_block("Normalized spec", normalized_spec)
 
                 runner.update("Validating spec", kind="warn")
@@ -447,24 +421,23 @@ elif mode == "Beautify existing PPT":
                 if result["errors"]:
                     raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
 
-                show_warnings(result["normalized_spec"])
-                
-                
+                show_warnings(result)
+
+                runner.update("Saving JSON artifacts")
+                extracted_json_path = OUTPUT_DIR / f"extracted_{job_id}.json"
+                beautified_json_path = OUTPUT_DIR / f"beautified_{job_id}.json"
+                save_json(extracted_spec, extracted_json_path)
+                save_json(result["normalized_spec"], beautified_json_path)
 
                 runner.update("Rendering PPT", kind="ok")
-                output_pptx = OUTPUT_DIR / f"beautified_{timestamp_str()}.pptx"
+                output_pptx = OUTPUT_DIR / f"beautified_{job_id}.pptx"
                 run_with_spinner(
-                    "Rendering beautified PowerPoint...",
+                    "Rendering PowerPoint...",
                     render_deck,
                     template_pptx=str(TEMPLATE_PATH),
                     deck_spec=result["normalized_spec"],
                     out_pptx=str(output_pptx)
                 )
-
-                extracted_json_path = OUTPUT_DIR / f"extracted_spec_{timestamp_str()}.json"
-                beautified_json_path = OUTPUT_DIR / f"beautified_spec_{timestamp_str()}.json"
-                save_json(extracted_spec, extracted_json_path)
-                save_json(beautified_spec, beautified_json_path)
 
                 runner.success("Beautified PPT ready")
 
@@ -553,7 +526,7 @@ elif mode == "Render from spec JSON":
                 if show_debug:
                     pretty_json_block("Normalized spec", result["normalized_spec"])
 
-                show_warnings(result["normalized_spec"])
+                show_warnings(result)
                 
                 
 
