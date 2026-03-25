@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import json
 from pathlib import Path
 
@@ -10,12 +9,7 @@ FLOW_TEMPLATE_INDEX = {
     "flow_chart_3": 16,
 }
 
-
 SLIDE_REGISTRY = {
-
-    # --------------------------------------------------
-    # Cover
-    # --------------------------------------------------
     "cover": {
         "family": "cover",
         "variant": "default",
@@ -24,17 +18,8 @@ SLIDE_REGISTRY = {
         "required_fields": ["topic", "speaker"],
         "density": "light",
         "image_slots": 0,
-        "fit_profile": {
-            "title_max_chars": 36,
-            "body_max_chars": 0,
-        },
-        "best_for": ["cover", "opening"],
-        "description": "Cover slide with title and speaker."
+        "fit_profile": {"title_max_chars": 36, "body_max_chars": 0},
     },
-
-    # --------------------------------------------------
-    # Agenda
-    # --------------------------------------------------
     "agenda": {
         "family": "agenda",
         "variant": "default",
@@ -45,18 +30,8 @@ SLIDE_REGISTRY = {
         "max_items": 5,
         "density": "medium",
         "image_slots": 0,
-        "fit_profile": {
-            "title_max_chars": 28,
-            "item_max_chars": 24,
-            "max_items": 5,
-        },
-        "best_for": ["overview", "agenda"],
-        "description": "Agenda slide."
+        "fit_profile": {"title_max_chars": 28, "item_max_chars": 24, "max_items": 5},
     },
-
-    # --------------------------------------------------
-    # Section divider
-    # --------------------------------------------------
     "section": {
         "family": "section",
         "variant": "default",
@@ -65,16 +40,9 @@ SLIDE_REGISTRY = {
         "required_fields": ["name"],
         "density": "light",
         "image_slots": 0,
-        "fit_profile": {
-            "title_max_chars": 30,
-        },
-        "best_for": ["divider", "chapter break", "transition"],
-        "description": "Section divider slide."
+        "fit_profile": {"title_max_chars": 30},
     },
 
-    # --------------------------------------------------
-    # 3 card slide with built-in images
-    # --------------------------------------------------
     "content_3extra_image": {
         "family": "content_3",
         "variant": "image",
@@ -83,24 +51,18 @@ SLIDE_REGISTRY = {
         "required_fields": ["title", "cards"],
         "max_cards": 3,
         "density": "medium",
-        "image_slots": 3,
+        "image_slots": 1,
         "fit_profile": {
             "title_max_chars": 30,
             "item_max_chars": 18,
             "content_max_chars": 48,
             "max_cards": 3,
         },
-        "best_for": ["three highlights", "three visual points"],
-        "description": "Three card content slide with built-in template images."
     },
-
-    # --------------------------------------------------
-    # 3 card slide (text only)
-    # --------------------------------------------------
-    "content_3extra": {
+    "content_3extra_a": {
         "family": "content_3",
-        "variant": "text",
-        "template_key": "content_3extra",
+        "variant": "a",
+        "template_key": "content_3extra_a",
         "template_slide_index": 5,
         "required_fields": ["title", "cards"],
         "max_cards": 3,
@@ -112,18 +74,29 @@ SLIDE_REGISTRY = {
             "content_max_chars": 56,
             "max_cards": 3,
         },
-        "best_for": ["three grouped ideas", "three parallel points"],
-        "description": "Three card content slide."
+    },
+    "content_3extra_b": {
+        "family": "content_3",
+        "variant": "b",
+        "template_key": "content_3extra_b",
+        "template_slide_index": 6,
+        "required_fields": ["title", "cards"],
+        "max_cards": 3,
+        "density": "dense",
+        "image_slots": 0,
+        "fit_profile": {
+            "title_max_chars": 30,
+            "item_max_chars": 18,
+            "content_max_chars": 56,
+            "max_cards": 3,
+        },
     },
 
-    # --------------------------------------------------
-    # 2 card slides (three variants)
-    # --------------------------------------------------
     "content_2_a": {
         "family": "content_2",
         "variant": "a",
         "template_key": "content_2_a",
-        "template_slide_index": 6,
+        "template_slide_index": 7,
         "required_fields": ["title", "cards"],
         "max_cards": 2,
         "density": "medium",
@@ -134,33 +107,27 @@ SLIDE_REGISTRY = {
             "content_max_chars": 64,
             "max_cards": 2,
         },
-        "best_for": ["two concepts", "balanced comparison", "paired highlights"],
-        "description": "Two card slide variant A."
     },
-
     "content_2_b": {
         "family": "content_2",
         "variant": "b",
         "template_key": "content_2_b",
-        "template_slide_index": 7,
+        "template_slide_index": 8,
         "required_fields": ["cards"],
         "max_cards": 2,
         "density": "light",
-        "image_slots": 2,
+        "image_slots": 0,
         "fit_profile": {
             "item_max_chars": 18,
             "content_max_chars": 54,
             "max_cards": 2,
         },
-        "best_for": ["short two-up summary", "paired visual points"],
-        "description": "Two card slide variant B."
     },
-
     "content_2_c": {
         "family": "content_2",
         "variant": "c",
         "template_key": "content_2_c",
-        "template_slide_index": 11,
+        "template_slide_index": 12,
         "required_fields": ["cards"],
         "max_cards": 2,
         "density": "dense",
@@ -170,18 +137,13 @@ SLIDE_REGISTRY = {
             "content_max_chars": 80,
             "max_cards": 2,
         },
-        "best_for": ["two text-heavy explanations", "before after"],
-        "description": "Two card slide variant C."
     },
 
-    # --------------------------------------------------
-    # Table slide
-    # --------------------------------------------------
     "table": {
         "family": "table",
         "variant": "default",
         "template_key": "table",
-        "template_slide_index": 8,
+        "template_slide_index": 9,
         "required_fields": ["columns", "rows"],
         "optional_fields": ["title"],
         "density": "dense",
@@ -192,18 +154,13 @@ SLIDE_REGISTRY = {
             "max_rows": 8,
             "cell_max_chars": 28,
         },
-        "best_for": ["comparison", "structured facts", "matrix"],
-        "description": "Table slide."
     },
 
-    # --------------------------------------------------
-    # One-content slide with built-in image
-    # --------------------------------------------------
     "content_image": {
         "family": "single",
         "variant": "image",
         "template_key": "content_image",
-        "template_slide_index": 9,
+        "template_slide_index": 10,
         "required_fields": ["title", "content"],
         "density": "light",
         "image_slots": 1,
@@ -211,18 +168,12 @@ SLIDE_REGISTRY = {
             "title_max_chars": 30,
             "content_max_chars": 220,
         },
-        "best_for": ["single key message", "hero explanation"],
-        "description": "One-content slide using the template's built-in image."
     },
-
-    # --------------------------------------------------
-    # One-content text slide
-    # --------------------------------------------------
     "content_text": {
         "family": "single",
         "variant": "text",
         "template_key": "content_text",
-        "template_slide_index": 10,
+        "template_slide_index": 11,
         "required_fields": ["title", "content"],
         "density": "medium",
         "image_slots": 0,
@@ -230,18 +181,13 @@ SLIDE_REGISTRY = {
             "title_max_chars": 30,
             "content_max_chars": 260,
         },
-        "best_for": ["single explanation", "one message text"],
-        "description": "One-content text slide."
     },
 
-    # --------------------------------------------------
-    # 4 card slides
-    # --------------------------------------------------
     "content_4_a": {
         "family": "content_4",
         "variant": "a",
         "template_key": "content_4_a",
-        "template_slide_index": 12,
+        "template_slide_index": 13,
         "required_fields": ["title", "cards"],
         "max_cards": 4,
         "density": "dense",
@@ -252,15 +198,12 @@ SLIDE_REGISTRY = {
             "content_max_chars": 40,
             "max_cards": 4,
         },
-        "best_for": ["four capabilities", "four item summary"],
-        "description": "Four card slide variant A."
     },
-
     "content_4_b": {
         "family": "content_4",
         "variant": "b",
         "template_key": "content_4_b",
-        "template_slide_index": 13,
+        "template_slide_index": 14,
         "required_fields": ["cards"],
         "max_cards": 4,
         "density": "medium",
@@ -270,18 +213,13 @@ SLIDE_REGISTRY = {
             "content_max_chars": 34,
             "max_cards": 4,
         },
-        "best_for": ["short four-up highlights", "compact summary"],
-        "description": "Four card slide variant B."
     },
 
-    # --------------------------------------------------
-    # Flow slide
-    # --------------------------------------------------
     "flow": {
         "family": "flow",
         "variant": "default",
         "template_key": "flow_chart_1",
-        "template_slide_index": 14,
+        "template_slide_index": 15,
         "required_fields": ["title", "steps"],
         "density": "medium",
         "image_slots": 0,
@@ -289,32 +227,26 @@ SLIDE_REGISTRY = {
             "title_max_chars": 28,
             "step_max_chars": 26,
             "max_steps": 6,
+            "long_step_threshold": 22,
         },
-        "best_for": ["process", "sequence", "workflow"],
-        "description": "Flow / SmartArt slide."
     },
 
-    # --------------------------------------------------
-    # Ending slide
-    # --------------------------------------------------
     "end": {
         "family": "end",
         "variant": "default",
         "template_key": "end",
-        "template_slide_index": 17,
+        "template_slide_index": 18,
         "required_fields": [],
         "density": "light",
         "image_slots": 0,
         "fit_profile": {},
-        "best_for": ["closing"],
-        "description": "Thank you slide."
     },
 }
 
 
 FAMILY_VARIANTS = {
     "content_2": ["content_2_a", "content_2_b", "content_2_c"],
-    "content_3": ["content_3extra", "content_3extra_image"],
+    "content_3": ["content_3extra_a", "content_3extra_b", "content_3extra_image"],
     "content_4": ["content_4_a", "content_4_b"],
     "single": ["content_image", "content_text"],
     "flow": ["flow"],
@@ -323,6 +255,14 @@ FAMILY_VARIANTS = {
     "agenda": ["agenda"],
     "section": ["section"],
     "end": ["end"],
+}
+
+
+ABSTRACT_TYPE_ALIASES = {
+    "content_2": "content_2_a",
+    "content_3": "content_3extra_a",
+    "content_4": "content_4_a",
+    "single": "content_text",
 }
 
 
@@ -342,11 +282,28 @@ def get_family_variants(family: str) -> list[str]:
     return list(FAMILY_VARIANTS.get(family, []))
 
 
+def normalize_registry_type(slide_type: str) -> str:
+    return ABSTRACT_TYPE_ALIASES.get(slide_type, slide_type)
+
+
 def resolve_flow_template_key(slide_spec: dict | None = None) -> str:
     slide_spec = slide_spec or {}
     preferred = str(slide_spec.get("variant") or slide_spec.get("template_key") or "").strip().lower()
     if preferred in FLOW_TEMPLATE_INDEX:
         return preferred
+
+    steps = [str(x).strip() for x in slide_spec.get("steps", []) if str(x).strip()]
+    max_len = max((len(x) for x in steps), default=0)
+
+    # 第三種給長文字
+    if max_len >= 22:
+        return "flow_chart_3"
+
+    text = " ".join(steps).lower()
+    loop_keywords = ["iteration", "iterate", "feedback", "cycle", "optimize", "improve", "review", "迭代", "循環", "回饋", "優化", "改善", "檢討"]
+    if any(k in text for k in loop_keywords):
+        return "flow_chart_2"
+
     return "flow_chart_1"
 
 
@@ -358,8 +315,68 @@ def _detect_flow_variant_from_shapes(shapes):
     return None
 
 
+def _infer_detected_type_from_shapes(shapes):
+    names = {str(s.get("name", "")).strip().lower() for s in shapes}
+
+    if {"title_content_1", "title_content_2", "content_1", "content_2"}.issubset(names) and "title" not in names:
+        return "content_2_b"
+
+    if {"item_1", "item_2", "content_1", "content_2"}.issubset(names) and "title" not in names:
+        return "content_2_c"
+
+    if {"title_content_1", "title_content_2", "content_1", "content_2", "title"}.issubset(names):
+        return "content_2_a"
+
+    if {"title", "content", "img"}.issubset(names):
+        return "content_image"
+
+    if {"title", "content"}.issubset(names) and "img" not in names:
+        return "content_text"
+
+    if {"title", "sheet_1"}.issubset(names):
+        return "table"
+
+    if {"title", "item_1", "item_2", "item_3", "content_1", "content_2", "content_3"}.issubset(names):
+        if {"img", "img_1", "img_2", "img_3"}.intersection(names):
+            return "content_3extra_image"
+        return "content_3extra_a"
+
+    if {"content_1", "content_2", "content_3", "content_4"}.issubset(names):
+        if "title" in names:
+            return "content_4_a"
+        return "content_4_b"
+
+    if "agenda_name" in names:
+        return "section"
+    if "outline" in names:
+        return "agenda"
+    if {"topic", "speaker_name"}.issubset(names):
+        return "cover"
+    if any(n.startswith("flow_chart_") for n in names):
+        return "flow"
+    return None
+
+
+def resolve_content_3_template_key(slide_spec: dict | None = None) -> str:
+    slide_spec = slide_spec or {}
+    preferred = str(
+        slide_spec.get("variant") or slide_spec.get("template_key") or ""
+    ).strip().lower()
+
+    allowed = {
+        "content_3extra_a",
+        "content_3extra_b",
+        "content_3extra_image",
+    }
+
+    if preferred in allowed:
+        return preferred
+
+    # 預設
+    return "content_3extra_a"
+
+
 def _apply_template_map_overrides():
-    """Best-effort sync of template indexes from template_map.json detected_type."""
     template_map_path = Path(__file__).resolve().parent / "template_map.json"
     if not template_map_path.exists():
         return
@@ -370,20 +387,23 @@ def _apply_template_map_overrides():
         return
 
     for slide in data:
-        detected_type = slide.get("detected_type")
         slide_index = slide.get("slide_index")
+        shapes = slide.get("shapes", [])
+        detected_type = slide.get("detected_type")
+        inferred_type = _infer_detected_type_from_shapes(shapes)
 
         if not isinstance(slide_index, int) or slide_index <= 0:
             continue
 
-        if detected_type in SLIDE_REGISTRY:
-            SLIDE_REGISTRY[detected_type]["template_slide_index"] = slide_index
+        resolved_type = detected_type if detected_type in SLIDE_REGISTRY else inferred_type
 
-        flow_variant = _detect_flow_variant_from_shapes(slide.get("shapes", []))
+        if resolved_type in SLIDE_REGISTRY:
+            SLIDE_REGISTRY[resolved_type]["template_slide_index"] = slide_index
+
+        flow_variant = _detect_flow_variant_from_shapes(shapes)
         if flow_variant:
             FLOW_TEMPLATE_INDEX[flow_variant] = slide_index
 
-    # Keep the base flow type aligned with default flow variant.
     SLIDE_REGISTRY["flow"]["template_slide_index"] = FLOW_TEMPLATE_INDEX.get(
         "flow_chart_1",
         SLIDE_REGISTRY["flow"]["template_slide_index"]

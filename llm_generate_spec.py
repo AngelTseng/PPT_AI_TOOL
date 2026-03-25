@@ -24,20 +24,16 @@ DECK_SPEC_SCHEMA = {
                         "type": {
                             "type": "string",
                             "enum": [
-                                "cover",
-                                "agenda",
-                                "section",
-                                "content_2",
-                                "content_3extra",
-                                "content_4",
-                                "table",
-                                "flow",
-                                "end"
+                                "cover", "agenda", "section", "content_2", 
+                                "content_3", "content_image", "content_4", 
+                                "table", "flow", "end"
                             ]
                         },
+                        "variant": {"type": "string"},
                         "topic": {"type": "string"},
                         "speaker": {"type": "string"},
                         "title": {"type": "string"},
+                        "content": {"type": "string"}, # Added content here for content_image
                         "items": {
                             "type": "array",
                             "items": {"type": "string"},
@@ -94,13 +90,17 @@ DECK_SPEC_SCHEMA = {
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
+                            "if": {"properties": {"type": {"const": "content_3"}}},
+                            "then": {"required": ["type", "title", "cards"]}
+                        },
+                        {
                             "if": {"properties": {"type": {"const": "content_4"}}},
                             "then": {"required": ["type", "title", "cards"]}
                         },
                         {
-                            "if": {"properties": {"type": {"const": "content_3extra"}}},
-                            "then": {"required": ["type", "title", "cards"]}
-                        },
+                            "if": {"properties": {"type": {"const": "content_image"}}},
+                            "then": {"required": ["type", "title", "content"]}
+                        }, # Added missing comma here
                         {
                             "if": {"properties": {"type": {"const": "table"}}},
                             "then": {"required": ["type", "columns", "rows"]}
@@ -161,11 +161,37 @@ Supported slide types:
 - agenda
 - section
 - content_2
-- content_3extra
+- content_3
 - content_4
+- content_image
 - table
 - flow
 - end
+
+Available layout variants:
+- content_2 -> content_2_a / content_2_b / content_2_c
+- content_3 -> content_3extra_a / content_3extra_b / content_3extra_image
+- content_4 -> content_4_a / content_4_b
+
+
+Variant rules:
+- Use field "variant" when you want to explicitly choose a template variant.
+- For content_3:
+  - content_3extra_a = standard 3-card text layout
+  - content_3extra_b = alternative 3-card text layout
+  - content_3extra_image = 3-card layout with image support
+- For content_2:
+  - content_2_a = title + 2 grouped blocks
+  - content_2_b = 2 grouped blocks without main title
+  - content_2_c = item/content pair layout
+- For content_4:
+  - content_4_a = titled 4-card layout
+  - content_4_b = compact 4-card layout
+
+Important:
+- Prefer output like:
+  {{"type":"content_3","variant":"content_3extra_b", ...}}
+- If no variant is strongly needed, omit "variant".
 
 Rules:
 - agenda.items: max 5
@@ -265,7 +291,8 @@ Use the template structure to choose appropriate slide types and content layout.
 def sanitize_slides(spec: dict) -> dict:
     allowed = {
         "cover", "agenda", "section",
-        "content_2", "content_3extra", "content_4",
+        "content_2", "content_3", "content_4",
+        "content_image",
         "table", "flow", "end"
     }
 

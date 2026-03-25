@@ -12,8 +12,8 @@ from extract_ppt_content import extract_ppt_to_spec
 from spec_normalizer import normalize_beautified_spec
 from spec_validator import validate_deck_spec
 from ppt_renderer import render_deck
-from rule_based_transform import rule_based_transform_spec
-from llm_beautify_spec import rewrite_overflow_fields_with_llm
+from llm_beautify_spec import beautify_spec
+from extract_word_content import extract_word_to_payload
 
 import platform     
 
@@ -144,6 +144,36 @@ def show_result_box(title: str, result: dict | None, clear_key: str):
         if st.button("🗑 Clear result", key=clear_key, use_container_width=True):
             return "clear"
 
+def build_word_prompt(word_payload: dict, duration_mode: str) -> str:
+    if duration_mode == "10-15 min":
+        min_slides, target, max_slides = 12, 14, 20
+    else:
+        min_slides, target, max_slides = 22, 26, 35
+
+    return f"""
+You are generating a PowerPoint deck from a Word report.
+
+Report title:
+{word_payload.get("title", "")}
+
+Report content:
+{word_payload.get("raw_text", "")}
+
+Presentation constraints:
+- Duration: {duration_mode}
+- Slide count minimum: {min_slides}
+- Preferred target: {target}
+- Maximum: {max_slides}
+
+Rules:
+- Must include cover and end slide
+- Each slide should contain ONE key idea
+- Split long content into multiple slides
+- Avoid empty slides
+- Avoid overly dense slides
+- Use structured bullet points
+"""
+
 # =========================
 # UI Header
 # =========================
@@ -156,8 +186,8 @@ if "generate_result" not in st.session_state:
 if "beautify_result" not in st.session_state:
     st.session_state.beautify_result = None
 
-if "render_result" not in st.session_state:
-    st.session_state.render_result = None
+if "word_generate_result" not in st.session_state:
+    st.session_state.word_generate_result = None
 
 st.title("📊 AI PPT Tool")
 st.caption("Generate, beautify, and render PowerPoint presentations using your company template.")
@@ -247,7 +277,7 @@ with st.sidebar:
         [
             "Generate from prompt",
             "Beautify existing PPT",
-            "Render from spec JSON"
+            "Generate from Word",
         ]
     )
     
@@ -352,16 +382,14 @@ if mode == "Generate from prompt":
         st.session_state.generate_result = None
         st.rerun()
                             
-                            
-
-# =========================
+      
+# ==========================
 # Mode 2: Beautify existing PPT
-# =========================
+# ==========================
+
 
 elif mode == "Beautify existing PPT":
-    st.subheader("Mode 2 · Beautify an existing PPT")
-    
-    job_id = timestamp_str()
+    st.subheader("Mode 2 · Beautify existing PPT")
 
     uploaded_ppt = st.file_uploader(
         "Upload a PPTX file",
@@ -378,67 +406,65 @@ elif mode == "Beautify existing PPT":
 
     if run_beautify:
         if uploaded_ppt is None:
-            st.error("Please upload a PPTX file first.")
+            st.error("Please upload a PPT file first.")
         else:
             try:
-                runner = StepRunner("Beautifying presentation...", total_steps=7, show_logs=show_logs)
+                runner = StepRunner("Beautifying PPT.", total_steps=6, show_logs=show_logs)
 
-                input_ppt_path = OUTPUT_DIR / f"uploaded_{job_id}_{uploaded_ppt.name}"
+                # 1️⃣ Save uploaded file
+                input_ppt_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_ppt.name}"
                 save_uploaded_file(uploaded_ppt, input_ppt_path)
 
-                runner.update("Extracting content from uploaded PPT")
+                runner.update("Extracting content from PPT")
                 extracted_spec = run_with_spinner(
-                    "Extracting slide content...",
+                    "Reading PPT content.",
                     extract_ppt_to_spec,
                     str(input_ppt_path)
                 )
 
-                runner.update("Transforming slides with rules")
-                transformed_spec = run_with_spinner(
-                    "Applying rule-based slide transformation...",
-                    rule_based_transform_spec,
+                if show_debug:
+                    pretty_json_block("Extracted spec", extracted_spec)
+
+                # 2️⃣ Beautify (LLM)
+                runner.update("Beautifying content with LLM")
+                beautified_spec = run_with_spinner(
+                    "LLM is improving the slide content.",
+                    beautify_spec,
                     extracted_spec
                 )
 
-                runner.update("Refining text with LLM")
-                rewritten_spec = run_with_spinner(
-                    "Refining slide text...",
-                    rewrite_overflow_fields_with_llm,
-                    transformed_spec
-                )
+                if show_debug:
+                    pretty_json_block("Beautified spec", beautified_spec)
 
+                # 3️⃣ Normalize
                 runner.update("Normalizing spec")
-                normalized_spec = normalize_beautified_spec(rewritten_spec)
+                normalized_spec = normalize_beautified_spec(beautified_spec)
 
                 if show_debug:
-                    pretty_json_block("Extracted spec", extracted_spec)
-                    pretty_json_block("Rule-transformed spec", transformed_spec)
-                    pretty_json_block("LLM-rewritten spec", rewritten_spec)
                     pretty_json_block("Normalized spec", normalized_spec)
 
+                # 4️⃣ Validate
                 runner.update("Validating spec", kind="warn")
                 result = validate_deck_spec(normalized_spec)
+
                 if result["errors"]:
                     raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
 
                 show_warnings(result)
 
-                runner.update("Saving JSON artifacts")
-                extracted_json_path = OUTPUT_DIR / f"extracted_{job_id}.json"
-                beautified_json_path = OUTPUT_DIR / f"beautified_{job_id}.json"
-                save_json(extracted_spec, extracted_json_path)
-                save_json(result["normalized_spec"], beautified_json_path)
-
+                # 5️⃣ Render PPT
                 runner.update("Rendering PPT", kind="ok")
-                output_pptx = OUTPUT_DIR / f"beautified_{job_id}.pptx"
+                output_pptx = OUTPUT_DIR / f"beautified_{timestamp_str()}.pptx"
+
                 run_with_spinner(
-                    "Rendering PowerPoint...",
+                    "Rendering PowerPoint.",
                     render_deck,
                     template_pptx=str(TEMPLATE_PATH),
                     deck_spec=result["normalized_spec"],
                     out_pptx=str(output_pptx)
                 )
 
+                # 6️⃣ Done
                 runner.success("Beautified PPT ready")
 
                 st.session_state.beautify_result = {
@@ -449,18 +475,6 @@ elif mode == "Beautify existing PPT":
                             "path": str(output_pptx),
                             "name": output_pptx.name,
                             "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                        },
-                        {
-                            "label": "Download Extracted Spec",
-                            "path": str(extracted_json_path),
-                            "name": extracted_json_path.name,
-                            "mime": "application/json"
-                        },
-                        {
-                            "label": "Download Beautified Spec",
-                            "path": str(beautified_json_path),
-                            "name": beautified_json_path.name,
-                            "mime": "application/json"
                         }
                     ]
                 }
@@ -474,66 +488,103 @@ elif mode == "Beautify existing PPT":
                 with st.expander("Error details"):
                     st.code(traceback.format_exc())
 
-    clear_action = show_result_box(
-        "Beautify result ready",
-        st.session_state.beautify_result,
-        clear_key="clear_beautify"
+    # 顯示結果
+    if st.session_state.beautify_result:
+        clear_action = show_result_box(
+            "Beautify result ready",
+            st.session_state.beautify_result,
+            clear_key="clear_beautify"
+        )
+
+        if clear_action == "clear":
+            st.session_state.beautify_result = None
+            st.rerun()
+
+                            
+# ==========================
+# Mode 3: Generate from Word
+# ==========================
+ 
+ 
+elif mode == "Generate from Word":
+    st.subheader("Mode 3 · Generate PPT from Word")
+
+    uploaded_docx = st.file_uploader(
+        "Upload a Word file",
+        type=["docx"],
+        key="upload_docx_mode3"
     )
 
-    if clear_action == "clear":
-        st.session_state.beautify_result = None
-        st.rerun()
-                        
-# =========================
-# Mode 3: Render from spec JSON
-# =========================
-
-elif mode == "Render from spec JSON":
-    st.subheader("Mode 3 · Render PPT from your own spec")
-
-    uploaded_spec = st.file_uploader(
-        "Upload a spec JSON file",
-        type=["json"],
-        key="upload_spec_mode3"
+    duration_mode = st.radio(
+        "Choose report duration",
+        ["10-15 min", "16-30 min"],
+        horizontal=True
     )
 
-    run_render = st.button(
-        "Render PPT",
+    run_generate_word = st.button(
+        "Generate PPT",
         type="primary",
         use_container_width=True,
-        key="render_btn"
+        key="generate_word_btn"
     )
 
-    if run_render:
-        if uploaded_spec is None:
-            st.error("Please upload a spec JSON file first.")
+    if run_generate_word:
+        if uploaded_docx is None:
+            st.error("Please upload a Word file first.")
         else:
             try:
-                runner = StepRunner("Rendering from spec...", total_steps=3, show_logs=show_logs)
+                runner = StepRunner("Generating PPT from Word.", total_steps=6, show_logs=show_logs)
 
-                runner.update("Loading JSON spec")
-                original_spec = load_json(uploaded_spec)
+                input_docx_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_docx.name}"
+                save_uploaded_file(uploaded_docx, input_docx_path)
+
+                runner.update("Extracting content from Word")
+                word_payload = run_with_spinner(
+                    "Reading Word content.",
+                    extract_word_to_payload,
+                    str(input_docx_path)
+                )
 
                 if show_debug:
-                    pretty_json_block("Original spec", original_spec)
+                    pretty_json_block("Extracted Word content", word_payload)
 
-                runner.update("Normalizing + validating spec", kind="warn")
-                normalized_spec = normalize_beautified_spec(original_spec)
+                runner.update("Generating draft spec with LLM")
+                generated_spec = run_with_spinner(
+                    "LLM is generating slide spec from Word.",
+                    generate_spec,
+                    build_word_prompt(word_payload, duration_mode)
+                )
+
+                if show_debug:
+                    pretty_json_block("Generated draft spec", generated_spec)
+
+                runner.update("Beautifying spec with LLM")
+                beautified_spec = run_with_spinner(
+                    "LLM is refining the slide spec.",
+                    beautify_spec,
+                    generated_spec
+                )
+
+                if show_debug:
+                    pretty_json_block("Beautified spec", beautified_spec)
+
+                runner.update("Normalizing spec")
+                normalized_spec = normalize_beautified_spec(beautified_spec)
+
+                if show_debug:
+                    pretty_json_block("Normalized spec", normalized_spec)
+
+                runner.update("Validating spec", kind="warn")
                 result = validate_deck_spec(normalized_spec)
                 if result["errors"]:
                     raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
 
-                if show_debug:
-                    pretty_json_block("Normalized spec", result["normalized_spec"])
-
                 show_warnings(result)
-                
-                
 
                 runner.update("Rendering PPT", kind="ok")
-                output_pptx = OUTPUT_DIR / f"spec_rendered_{timestamp_str()}.pptx"
+                output_pptx = OUTPUT_DIR / f"word_generated_{timestamp_str()}.pptx"
                 run_with_spinner(
-                    "Rendering PowerPoint...",
+                    "Rendering PowerPoint.",
                     render_deck,
                     template_pptx=str(TEMPLATE_PATH),
                     deck_spec=result["normalized_spec"],
@@ -542,8 +593,8 @@ elif mode == "Render from spec JSON":
 
                 runner.success("PPT ready")
 
-                st.session_state.render_result = {
-                    "summary": f"Latest rendered file: {output_pptx.name}",
+                st.session_state.word_generate_result = {
+                    "summary": f"Latest generated file: {output_pptx.name}",
                     "files": [
                         {
                             "label": "Download PPT",
@@ -556,21 +607,19 @@ elif mode == "Render from spec JSON":
 
             except Exception as e:
                 if "runner" in locals():
-                    runner.error(f"Render failed: {e}")
+                    runner.error(f"Word generate failed: {e}")
                 else:
-                    st.error(f"Render failed: {e}")
+                    st.error(f"Word generate failed: {e}")
 
                 with st.expander("Error details"):
                     st.code(traceback.format_exc())
 
     clear_action = show_result_box(
-        "Render result ready",
-        st.session_state.render_result,
-        clear_key="clear_render"
+        "Word generate result ready",
+        st.session_state.word_generate_result,
+        clear_key="clear_word_generate"
     )
 
     if clear_action == "clear":
-        st.session_state.render_result = None
+        st.session_state.word_generate_result = None
         st.rerun()
-        
-    

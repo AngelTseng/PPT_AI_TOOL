@@ -6,7 +6,6 @@ from spec_validator import validate_deck_spec
 from spec_normalizer import normalize_beautified_spec
 
 from llm_generate_spec import generate_spec
-from llm_beautify_spec import beautify_spec
 from extract_ppt_content import extract_ppt_to_spec
 
 
@@ -111,12 +110,18 @@ def main():
         save_spec_to_file(extracted, "extracted_deck_spec.json")
         print("[INFO] Saved extracted spec to: extracted_deck_spec.json")
 
-        beautified = beautify_spec(extracted)
+        from rule_based_transform import rule_based_transform_spec
+        from llm_beautify_spec import rewrite_overflow_fields_with_llm
 
-        save_spec_to_file(beautified, "beautified_deck_spec.json")
+        transformed = rule_based_transform_spec(extracted)
+        save_spec_to_file(transformed, "transformed_deck_spec.json")
+        print("[INFO] Saved transformed spec to: transformed_deck_spec.json")
+
+        rewritten = rewrite_overflow_fields_with_llm(transformed)
+        save_spec_to_file(rewritten, "beautified_deck_spec.json")
         print("[INFO] Saved beautified spec to: beautified_deck_spec.json")
 
-        spec = beautified
+        spec = rewritten
 
     elif mode == "3":
         spec_path = choose_spec_file()

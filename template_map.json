@@ -279,17 +279,6 @@
         "protect_reason": "text_container"
       },
       {
-        "name": "Straight Connector 13",
-        "is_placeholder": false,
-        "has_text": false,
-        "has_table": false,
-        "has_chart": false,
-        "shape_type": "LINE (9)",
-        "role": "background",
-        "allow_text_overlap": true,
-        "protect_reason": "decorative_shape"
-      },
-      {
         "name": "content_2",
         "is_placeholder": false,
         "has_text": true,
@@ -310,35 +299,108 @@
         "role": "background",
         "allow_text_overlap": true,
         "protect_reason": "decorative_picture"
-      },
-      {
-        "name": "img_2",
-        "is_placeholder": false,
-        "has_text": false,
-        "has_table": false,
-        "has_chart": false,
-        "shape_type": "PICTURE (13)",
-        "role": "background",
-        "allow_text_overlap": true,
-        "protect_reason": "decorative_picture"
-      },
-      {
-        "name": "img_3",
-        "is_placeholder": false,
-        "has_text": false,
-        "has_table": false,
-        "has_chart": false,
-        "shape_type": "PICTURE (13)",
-        "role": "background",
-        "allow_text_overlap": true,
-        "protect_reason": "decorative_picture"
       }
     ]
   },
   {
     "slide_index": 5,
     "layout": "3_EXTRA",
-    "detected_type": "content_3extra",
+    "detected_type": "content_3extra_a",
+    "shapes": [
+      {
+        "name": "content_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)",
+        "role": "protected",
+        "allow_text_overlap": false,
+        "protect_reason": "text_container"
+      },
+      {
+        "name": "item_1",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)",
+        "role": "protected",
+        "allow_text_overlap": false,
+        "protect_reason": "text_container"
+      },
+      {
+        "name": "item_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)",
+        "role": "protected",
+        "allow_text_overlap": false,
+        "protect_reason": "text_container"
+      },
+      {
+        "name": "content_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)",
+        "role": "protected",
+        "allow_text_overlap": false,
+        "protect_reason": "text_container"
+      },
+      {
+        "name": "item_3",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)",
+        "role": "protected",
+        "allow_text_overlap": false,
+        "protect_reason": "text_container"
+      },
+      {
+        "name": "title",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)",
+        "role": "protected",
+        "allow_text_overlap": false,
+        "protect_reason": "text_container"
+      },
+      {
+        "name": "Straight Connector 13",
+        "is_placeholder": false,
+        "has_text": false,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "LINE (9)",
+        "role": "background",
+        "allow_text_overlap": true,
+        "protect_reason": "decorative_shape"
+      },
+      {
+        "name": "content_2",
+        "is_placeholder": false,
+        "has_text": true,
+        "has_table": false,
+        "has_chart": false,
+        "shape_type": "TEXT_BOX (17)",
+        "role": "protected",
+        "allow_text_overlap": false,
+        "protect_reason": "text_container"
+      }
+    ]
+  },
+  {
+    "slide_index": 6,
+    "layout": "3_EXTRA",
+    "detected_type": "content_3extra_b",
     "shapes": [
       {
         "name": "矩形: 圓角 5",
@@ -453,7 +515,7 @@
     ]
   },
   {
-    "slide_index": 6,
+    "slide_index": 7,
     "layout": "3_EXTRA",
     "detected_type": "content_2_a",
     "shapes": [
@@ -548,7 +610,7 @@
     ]
   },
   {
-    "slide_index": 7,
+    "slide_index": 8,
     "layout": "3_EXTRA",
     "detected_type": "unknown",
     "shapes": [
@@ -610,7 +672,7 @@
     ]
   },
   {
-    "slide_index": 8,
+    "slide_index": 9,
     "layout": "3_EXTRA",
     "detected_type": "table",
     "shapes": [
@@ -650,7 +712,7 @@
     ]
   },
   {
-    "slide_index": 9,
+    "slide_index": 10,
     "layout": "3_EXTRA",
     "detected_type": "content_image",
     "shapes": [
@@ -701,7 +763,7 @@
     ]
   },
   {
-    "slide_index": 10,
+    "slide_index": 11,
     "layout": "3_EXTRA",
     "detected_type": "content_text",
     "shapes": [
@@ -752,7 +814,7 @@
     ]
   },
   {
-    "slide_index": 11,
+    "slide_index": 12,
     "layout": "3_EXTRA",
     "detected_type": "content_2_c",
     "shapes": [
@@ -825,7 +887,7 @@
     ]
   },
   {
-    "slide_index": 12,
+    "slide_index": 13,
     "layout": "3_EXTRA",
     "detected_type": "content_4_a",
     "shapes": [
@@ -931,7 +993,7 @@
     ]
   },
   {
-    "slide_index": 13,
+    "slide_index": 14,
     "layout": "3_EXTRA",
     "detected_type": "content_4_b",
     "shapes": [
@@ -1048,7 +1110,7 @@
     ]
   },
   {
-    "slide_index": 14,
+    "slide_index": 15,
     "layout": "3_EXTRA",
     "detected_type": "flow",
     "shapes": [
@@ -1088,7 +1150,7 @@
     ]
   },
   {
-    "slide_index": 15,
+    "slide_index": 16,
     "layout": "3_EXTRA",
     "detected_type": "flow",
     "shapes": [
@@ -1128,7 +1190,7 @@
     ]
   },
   {
-    "slide_index": 16,
+    "slide_index": 17,
     "layout": "3_EXTRA",
     "detected_type": "flow",
     "shapes": [
@@ -1168,7 +1230,7 @@
     ]
   },
   {
-    "slide_index": 17,
+    "slide_index": 18,
     "layout": "1_標題投影片",
     "detected_type": "end",
     "shapes": [
