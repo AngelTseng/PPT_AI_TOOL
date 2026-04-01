@@ -173,11 +173,14 @@ def normalize_beautified_spec(spec: dict) -> dict:
                 avg_len = _avg_content_len(cards)
                 resolved = "content_3extra_b" if avg_len > 60 else "content_3extra_a"
 
-            normalized.append({
+            payload = {
                 "type": resolved,
                 "title": title,
                 "cards": cards
-            })
+            }
+            if isinstance(images, list) and images:
+                payload["images"] = images
+            normalized.append(payload)
 
         elif t in ("content_4", "content_4_a", "content_4_b"):
             cards = slide.get("cards")

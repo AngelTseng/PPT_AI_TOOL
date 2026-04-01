@@ -15,7 +15,8 @@ from ppt_renderer import render_deck
 from llm_beautify_spec import beautify_spec
 from extract_word_content import extract_word_to_payload
 
-import platform     
+import platform  
+import shutil   
 
 # =========================
 # Basic config
@@ -98,10 +99,64 @@ def save_json(data: dict, target_path: Path) -> Path:
 def load_json(uploaded_file) -> dict:
     return json.loads(uploaded_file.getvalue().decode("utf-8"))
 
-
 def read_file_bytes(path: Path) -> bytes:
     with open(path, "rb") as f:
         return f.read()
+
+def export_ppt_preview_images(pptx_path: Path) -> list[str]:
+    """
+    Export a PPTX into per-slide JPG preview images (Windows + PowerPoint COM only).
+    Returns image paths; returns empty list when preview export is unavailable.
+    """
+    if platform.system().lower() != "windows":
+        return []
+
+    try:
+        import pythoncom
+        import win32com.client as win32
+    except Exception:
+        return []
+
+    preview_dir = OUTPUT_DIR / f"{pptx_path.stem}_preview"
+    if preview_dir.exists():
+        shutil.rmtree(preview_dir, ignore_errors=True)
+    preview_dir.mkdir(parents=True, exist_ok=True)
+
+    app = None
+    pres = None
+
+    try:
+        pythoncom.CoInitialize()
+        app = win32.Dispatch("PowerPoint.Application")
+        app.Visible = True
+        pres = app.Presentations.Open(str(pptx_path.resolve()), WithWindow=False)
+
+        # 17 = ppSaveAsJPG
+        pres.SaveAs(str(preview_dir.resolve()), 17)
+    except Exception:
+        return []
+    finally:
+        if pres is not None:
+            pres.Close()
+        if app is not None:
+            app.Quit()
+        try:
+            pythoncom.CoUninitialize()
+        except Exception:
+            pass
+
+    # 只抓一次，並做去重
+    images = []
+    seen = set()
+
+    for p in sorted(preview_dir.iterdir()):
+        if p.is_file() and p.suffix.lower() == ".jpg":
+            key = str(p.resolve()).lower()
+            if key not in seen:
+                seen.add(key)
+                images.append(str(p))
+
+    return images
 
 def show_warnings(result: dict):
     if result["warnings"]:
@@ -140,6 +195,12 @@ def show_result_box(title: str, result: dict | None, clear_key: str):
                         use_container_width=True,
                         key=f"download_{file_info['name']}"
                     )
+
+        preview_images = result.get("preview_images", [])
+        if preview_images:
+            with st.expander("👀 PPT Preview", expanded=False):
+                for idx, image_path in enumerate(preview_images, start=1):
+                    st.image(image_path, caption=f"Slide {idx}", use_container_width=True)
 
         if st.button("🗑 Clear result", key=clear_key, use_container_width=True):
             return "clear"
@@ -360,7 +421,8 @@ if mode == "Generate from prompt":
                             "name": out_path.name,
                             "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
                         }
-                    ]
+                    ],
+                    "preview_images": export_ppt_preview_images(out_path)
                 }
 
             except Exception as e:
@@ -476,7 +538,8 @@ elif mode == "Beautify existing PPT":
                             "name": output_pptx.name,
                             "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
                         }
-                    ]
+                    ],
+                    "preview_images": export_ppt_preview_images(output_pptx)
                 }
 
             except Exception as e:
@@ -602,7 +665,8 @@ elif mode == "Generate from Word":
                             "name": output_pptx.name,
                             "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
                         }
-                    ]
+                    ],
+                    "preview_images": export_ppt_preview_images(output_pptx)
                 }
 
             except Exception as e:
