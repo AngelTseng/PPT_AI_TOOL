@@ -102,7 +102,6 @@ def load_json(uploaded_file) -> dict:
 def read_file_bytes(path: Path) -> bytes:
     with open(path, "rb") as f:
         return f.read()
-
 def export_ppt_preview_images(pptx_path: Path) -> list[str]:
     """
     Export a PPTX into per-slide JPG preview images (Windows + PowerPoint COM only).
