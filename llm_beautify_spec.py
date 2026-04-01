@@ -240,6 +240,7 @@ Important:
 - If content is too long for one slide, split it into multiple slides when needed.
 - Use section slides to break the deck into meaningful chapters and improve pacing.
 - For slides with images from source, keep the `images` array with original `image_path`.
+- `content_3extra_image` (template slide 4) and `content_image` (template slide 10) have replaceable main image slots; when source images are kept, preserve `images` so renderer can replace those template pictures.
 - For source table/flow slides, preserve original table/flow structure and avoid converting to other types unless impossible.
 
 Here is the extracted presentation spec:

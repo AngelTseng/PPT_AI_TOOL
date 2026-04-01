@@ -140,13 +140,18 @@ def build_template_summary(template_map: list) -> str:
         shapes = slide.get("shapes", [])
 
         shape_names = []
+        image_shapes = []
         for shp in shapes:
             name = shp.get("name", "").strip()
             if name:
                 shape_names.append(name)
+            if str(shp.get("role", "")).strip().lower() == "image" and name:
+                image_shapes.append(name)
 
         if shape_names:
             lines.append(f"Slide {slide_index}: " + ", ".join(shape_names))
+        if image_shapes:
+            lines.append(f"Slide {slide_index} replaceable_images: " + ", ".join(image_shapes))
 
     return "\n".join(lines)
 

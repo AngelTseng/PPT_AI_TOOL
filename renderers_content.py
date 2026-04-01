@@ -71,7 +71,6 @@ def render_content_2_a(slide, slide_spec):
             keep_names.add(content_name)
             set_text(slide, content_name, content_text)
 
-    keep_names |= apply_images_to_placeholders(slide, slide_spec, ["img_1", "img_2", "img"])
     return keep_names
 
 
@@ -99,7 +98,6 @@ def render_content_2_b(slide, slide_spec):
             keep_names.add(content_name)
             set_text(slide, content_name, content_text)
 
-    keep_names |= apply_images_to_placeholders(slide, slide_spec, ["img_1", "img_2", "img"])
     return keep_names
 
 
@@ -148,6 +146,17 @@ def render_content_3extra(slide, slide_spec):
                 set_text(slide, content_name, str(cards[i - 1].get("content", "")))
             else:
                 set_text(slide, content_name, "")
+
+    slide_type = str(slide_spec.get("type", "")).strip().lower()
+    variant = str(slide_spec.get("variant", "")).strip().lower()
+    template_key = str(slide_spec.get("template_key", "")).strip().lower()
+
+    if (
+        slide_type == "content_3extra_image"
+        or variant == "content_3extra_image"
+        or template_key == "content_3extra_image"
+    ):
+        keep_names |= apply_images_to_placeholders(slide, slide_spec, ["img_1", "img"])
 
     return keep_names
 

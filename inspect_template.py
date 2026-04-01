@@ -147,9 +147,13 @@ def classify_shape(shp, slide_type: str, slide_index: int):
     if slide_type == "cover" and shape_type == MSO_SHAPE_TYPE.PICTURE:
         return "protected", False, "cover_image"
 
-    if slide_type in {"content_image", "content_3extra_image"} and shape_type == MSO_SHAPE_TYPE.PICTURE:
+    if (
+        slide_index in {4, 10}
+        and slide_type in {"content_image", "content_3extra_image"}
+        and shape_type == MSO_SHAPE_TYPE.PICTURE
+    ):
         if lname in {"img", "img_1", "main_image", "picture_1"} or lname.startswith("img"):
-            return "protected", False, "main_picture"
+            return "image", False, "replaceable_main_picture"
 
     if shape_type == MSO_SHAPE_TYPE.PICTURE:
         return "background", True, "decorative_picture"
