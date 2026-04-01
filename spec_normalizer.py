@@ -67,6 +67,7 @@ def normalize_beautified_spec(spec: dict) -> dict:
 
     for slide in slides:
         t = slide.get("type")
+        images = slide.get("images", [])
 
         if t == "cover":
             normalized.append({
@@ -109,11 +110,14 @@ def normalize_beautified_spec(spec: dict) -> dict:
                 # 避免 validator 報 slides[i].content required
                 content = f"{title}：請補充內容"
 
-            normalized.append({
+            payload = {
                 "type": resolved,
                 "title": title,
                 "content": content
-            })
+            }
+            if isinstance(images, list) and images:
+                payload["images"] = images
+            normalized.append(payload)
 
         elif t in ("content_2", "content_2_a", "content_2_b", "content_2_c"):
             cards = slide.get("cards")
@@ -133,11 +137,14 @@ def normalize_beautified_spec(spec: dict) -> dict:
                 else:
                     resolved = "content_2_b"
 
-            normalized.append({
+            payload = {
                 "type": resolved,
                 "title": slide.get("title", ""),
                 "cards": cards
-            })
+            }
+            if isinstance(images, list) and images:
+                payload["images"] = images
+            normalized.append(payload)
 
         elif t in (
             "content_3",

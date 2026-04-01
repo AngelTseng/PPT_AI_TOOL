@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import win32com.client as win32
 import pythoncom
 
@@ -100,7 +101,20 @@ def get_table_data(slide, table_name: str):
     except Exception:
         return [], []
 
-def extract_images(slide):
+def _safe_name(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", str(text or "").strip()) or "shape"
+
+
+def _export_shape_image(shp, image_path: str) -> bool:
+    try:
+        # ppShapeFormatPNG = 2
+        shp.Export(image_path, 2)
+        return os.path.exists(image_path)
+    except Exception:
+        return False
+
+
+def extract_images(slide, assets_dir=None, slide_index=None):
     images = []
 
     for i in range(1, slide.Shapes.Count + 1):
@@ -118,6 +132,14 @@ def extract_images(slide):
 
         # msoLinkedPicture=11, msoPicture=13
         if shape_type in (11, 13):
+            image_path = None
+            if assets_dir:
+                safe_name = _safe_name(name)
+                filename = f"slide_{int(slide_index or 0):03d}_{safe_name}_{i}.png"
+                candidate = os.path.join(assets_dir, filename)
+                if _export_shape_image(shp, candidate):
+                    image_path = candidate
+
             try:
                 images.append({
                     "shape_name": name,
@@ -126,11 +148,13 @@ def extract_images(slide):
                     "top": shp.Top,
                     "width": shp.Width,
                     "height": shp.Height,
+                    "image_path": image_path,
                 })
             except Exception:
                 images.append({
                     "shape_name": name,
                     "shape_type": shape_type,
+                    "image_path": image_path,
                 })
 
     return images
@@ -274,17 +298,17 @@ def detect_slide_type(slide) -> str:
     return "unknown"
 
 
-def extract_cover(slide):
+def extract_cover(slide, assets_dir=None, slide_index=None):
     return {
         "type": "cover",
         "topic": get_text_from_shape(slide, "Topic"),
         "speaker": get_text_from_shape(slide, "speaker_name"),
         "text_boxes": extract_text_boxes(slide),
-        "images": extract_images(slide),
+        "images": extract_images(slide, assets_dir=assets_dir, slide_index=slide_index),
     }
 
 
-def extract_agenda(slide):
+def extract_agenda(slide, assets_dir=None, slide_index=None):
     items = []
     for i in range(1, 6):
         text = get_text_from_shape(slide, f"agenda_{i}")
@@ -296,7 +320,7 @@ def extract_agenda(slide):
         "title": get_text_from_shape(slide, "outline") or "Agenda",
         "items": items,
         "text_boxes": extract_text_boxes(slide),
-        "images": extract_images(slide),
+        "images": extract_images(slide, assets_dir=assets_dir, slide_index=slide_index),
     }
 
 
@@ -327,7 +351,7 @@ def extract_content_3extra(slide):
     }
 
 
-def extract_content_2(slide, variant: str):
+def extract_content_2(slide, variant: str, assets_dir=None, slide_index=None):
     cards = []
     for i in range(1, 3):
         item = get_text_from_shape(slide, f"item_{i}") or f"Point {i}"
@@ -335,11 +359,15 @@ def extract_content_2(slide, variant: str):
         if item or content:
             cards.append({"item": item, "content": content})
 
-    return {
+    payload = {
         "type": variant,
         "title": get_text_from_shape(slide, "title"),
         "cards": cards,
     }
+    images = extract_images(slide, assets_dir=assets_dir, slide_index=slide_index)
+    if images:
+        payload["images"] = images
+    return payload
 
 
 def extract_content_4(slide, variant: str):
@@ -357,12 +385,12 @@ def extract_content_4(slide, variant: str):
     }
 
 
-def extract_content_image(slide):
+def extract_content_image(slide, assets_dir=None, slide_index=None):
     return {
         "type": "content_image",
         "title": get_text_from_shape(slide, "title"),
         "content": get_text_from_shape(slide, "content"),
-        "images": extract_images(slide),
+        "images": extract_images(slide, assets_dir=assets_dir, slide_index=slide_index),
     }
 
 def extract_content_text(slide):
@@ -390,7 +418,7 @@ def extract_flow(slide):
         "steps": get_smartart_steps(slide, prefer_name=prefer_name),
     }
 
-def extract_unknown(slide):
+def extract_unknown(slide, assets_dir=None, slide_index=None):
     has_table = False
     has_smartart = False
 
@@ -414,30 +442,30 @@ def extract_unknown(slide):
         "slide_index": slide.SlideIndex,
         "shape_names": extract_shape_names(slide),
         "text_boxes": extract_text_boxes(slide),
-        "images": extract_images(slide),
+        "images": extract_images(slide, assets_dir=assets_dir, slide_index=slide_index),
         "has_table": has_table,
         "has_smartart": has_smartart,
     }
     
 
-def extract_slide(slide):
+def extract_slide(slide, assets_dir=None, slide_index=None):
     slide_type = detect_slide_type(slide)
 
     if slide_type == "cover":
-        return extract_cover(slide)
+        return extract_cover(slide, assets_dir=assets_dir, slide_index=slide_index)
     elif slide_type == "agenda":
-        return extract_agenda(slide)
+        return extract_agenda(slide, assets_dir=assets_dir, slide_index=slide_index)
     elif slide_type == "section":
         return extract_section(slide)
     
     elif slide_type == "content_3extra":
         return extract_content_3extra(slide)
     elif slide_type in ("content_2", "content_2_a", "content_2_b", "content_2_c"):
-        return extract_content_2(slide, slide_type)
+        return extract_content_2(slide, slide_type, assets_dir=assets_dir, slide_index=slide_index)
     elif slide_type in ("content_4", "content_4_a", "content_4_b"):
         return extract_content_4(slide, slide_type)
     elif slide_type == "content_image":
-        return extract_content_image(slide)
+        return extract_content_image(slide, assets_dir=assets_dir, slide_index=slide_index)
     elif slide_type == "content_text":
         return extract_content_text(slide)
     elif slide_type == "table":
@@ -446,7 +474,7 @@ def extract_slide(slide):
     elif slide_type == "flow":
         return extract_flow(slide)
     else:
-        return extract_unknown(slide)
+        return extract_unknown(slide, assets_dir=assets_dir, slide_index=slide_index)
 
 def extract_ppt_to_spec(input_pptx: str) -> dict:
     with com_session():
@@ -458,11 +486,13 @@ def extract_ppt_to_spec(input_pptx: str) -> dict:
             app.Visible = True
 
             pres = app.Presentations.Open(os.path.abspath(input_pptx), WithWindow=False)
+            assets_dir = os.path.splitext(os.path.abspath(input_pptx))[0] + "_assets"
+            os.makedirs(assets_dir, exist_ok=True)
 
             slides = []
             for i in range(1, pres.Slides.Count + 1):
                 slide = pres.Slides(i)
-                slides.append(extract_slide(slide))
+                slides.append(extract_slide(slide, assets_dir=assets_dir, slide_index=i))
 
             return {"slides": slides}
 

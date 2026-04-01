@@ -65,6 +65,16 @@ BEAUTIFY_SCHEMA = {
                             "type": "array",
                             "items": {"type": "string"},
                             "minItems": 2
+                        },
+                        "images": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "shape_name": {"type": "string"},
+                                    "image_path": {"type": "string"}
+                                }
+                            }
                         }
                     },
                     "required": ["type"],
@@ -229,6 +239,8 @@ Important:
 - If a slide has raw title + multiple explanatory paragraphs, convert it into the most suitable content slide instead of defaulting to content_3extra.
 - If content is too long for one slide, split it into multiple slides when needed.
 - Use section slides to break the deck into meaningful chapters and improve pacing.
+- For slides with images from source, keep the `images` array with original `image_path`.
+- For source table/flow slides, preserve original table/flow structure and avoid converting to other types unless impossible.
 
 Here is the extracted presentation spec:
 {json.dumps(extracted_spec, ensure_ascii=False, indent=2)}
@@ -251,6 +263,45 @@ def sanitize_slides(spec: dict) -> dict:
     spec["slides"] = cleaned
     return spec
 
+
+def _preserve_visual_assets(extracted_spec: dict, beautified_spec: dict) -> dict:
+    src_slides = extracted_spec.get("slides", []) or []
+    dst_slides = beautified_spec.get("slides", []) or []
+
+    for idx, dst in enumerate(dst_slides):
+        if idx >= len(src_slides) or not isinstance(dst, dict):
+            continue
+
+        src = src_slides[idx]
+        if not isinstance(src, dict):
+            continue
+
+        src_images = src.get("images", [])
+        if isinstance(src_images, list) and src_images:
+            existing = dst.get("images")
+            if not isinstance(existing, list) or not existing:
+                dst["images"] = src_images
+
+        src_type = src.get("type")
+        if src_type == "table":
+            if dst.get("type") != "table":
+                dst["type"] = "table"
+            if not dst.get("columns"):
+                dst["columns"] = src.get("columns", [])
+            if not dst.get("rows"):
+                dst["rows"] = src.get("rows", [])
+
+        if src_type == "flow":
+            if dst.get("type") != "flow":
+                dst["type"] = "flow"
+            if not dst.get("steps"):
+                dst["steps"] = src.get("steps", [])
+            if not dst.get("title"):
+                dst["title"] = src.get("title", "")
+
+    beautified_spec["slides"] = dst_slides
+    return beautified_spec
+
 def beautify_spec(extracted_spec: dict) -> dict:
     prompt = build_prompt(extracted_spec)
 
@@ -270,6 +321,8 @@ def beautify_spec(extracted_spec: dict) -> dict:
     text = resp.choices[0].message.content
     spec = json.loads(text)
     spec = sanitize_slides(spec)
+    spec = _preserve_visual_assets(extracted_spec, spec)
+
 
     slides = spec.get("slides", [])
     print("[INFO] beautified slide count:", len(slides))

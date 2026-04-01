@@ -17,7 +17,6 @@ data = []
 def _normalize_shape_names(shape_names: set[str]) -> set[str]:
     return {str(n).strip().lower() for n in shape_names if str(n).strip()}
 
-
 def detect_template_type(shape_names: set, shapes: list, slide_index: int, total_slides: int) -> str:
     names = _normalize_shape_names(shape_names)
 
@@ -62,8 +61,20 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
         has("item_1") and has("item_2") and has("item_3")
         and has("content_1") and has("content_2") and has("content_3")
     ):
+        # 先判特徵版型，再判通用型
         if has_img("img"):
             return "content_3extra_image"
+
+        if any(str(s.get("name", "")).strip().lower().startswith("straight connector") for s in shapes):
+            return "content_3extra_a"
+
+        rounded_rects = sum(
+            1 for s in shapes
+            if "矩形: 圓角" in str(s.get("name", "")).strip()
+        )
+        if rounded_rects >= 3:
+            return "content_3extra_b"
+
         return "content_3extra"
 
     if (
@@ -90,7 +101,15 @@ def detect_template_type(shape_names: set, shapes: list, slide_index: int, total
     ):
         return "content_2_b"
 
+    if (
+        has("content_1") and has("content_2")
+        and has("title_content_1") and has("title_content_2")
+        and not has("img_1") and not has("img_2")
+    ):
+        return "content_2_text"
+
     return "unknown"
+
 
 def classify_shape(shp, slide_type: str, slide_index: int):
     name = str(getattr(shp, "name", "") or "").strip()
@@ -114,34 +133,27 @@ def classify_shape(shp, slide_type: str, slide_index: int):
         "title_content_1", "title_content_2",
     }
 
-    # 1) 表格 / 圖表 一律保護
     if has_table:
         return "protected", False, "table"
     if has_chart:
         return "protected", False, "chart"
 
-    # 2) flow chart 物件一律保護
     if lname.startswith("flow_chart_"):
         return "protected", False, "flow_chart"
 
-    # 3) 明確命名的內容文字框才保護
     if lname in protected_text_names:
         return "protected", False, "text_container"
 
-    # 4) 首頁主圖片：保護
     if slide_type == "cover" and shape_type == MSO_SHAPE_TYPE.PICTURE:
         return "protected", False, "cover_image"
 
-    # 5) slide 9 / content_image 的主圖片：保護
-    if slide_type == "content_image" and shape_type == MSO_SHAPE_TYPE.PICTURE:
+    if slide_type in {"content_image", "content_3extra_image"} and shape_type == MSO_SHAPE_TYPE.PICTURE:
         if lname in {"img", "img_1", "main_image", "picture_1"} or lname.startswith("img"):
-            return "protected", False, "content_image_main_picture"
+            return "protected", False, "main_picture"
 
-    # 6) 其他圖片：背景
     if shape_type == MSO_SHAPE_TYPE.PICTURE:
         return "background", True, "decorative_picture"
 
-    # 7) 幾何圖形 / 線條 / 群組：背景
     if shape_type in {
         MSO_SHAPE_TYPE.AUTO_SHAPE,
         MSO_SHAPE_TYPE.FREEFORM,
@@ -151,18 +163,16 @@ def classify_shape(shp, slide_type: str, slide_index: int):
     }:
         return "background", True, "decorative_shape"
 
-    # 8) 其他有文字框但不是命名內容框者，視為背景形狀
     if has_text:
         return "background", True, "decorative_shape_with_text_frame"
 
-    # 9) 其他未知物件，保守保護
     return "protected", False, "unknown_object"
 
 for i, slide in enumerate(prs.slides, start=1):
     raw_shapes = []
     for shp in slide.shapes:
         raw_shapes.append({
-            "name": getattr(shp, "name", ""),
+            "name": str(getattr(shp, "name", "") or "").strip(),
             "is_placeholder": getattr(shp, "is_placeholder", False),
             "has_text": getattr(shp, "has_text_frame", False),
             "has_table": getattr(shp, "has_table", False),
@@ -186,7 +196,7 @@ for i, slide in enumerate(prs.slides, start=1):
             slide_index=i,
         )
         enriched_shapes.append({
-            "name": getattr(shp, "name", ""),
+            "name": str(getattr(shp, "name", "") or "").strip(),
             "is_placeholder": getattr(shp, "is_placeholder", False),
             "has_text": getattr(shp, "has_text_frame", False),
             "has_table": getattr(shp, "has_table", False),

@@ -20,8 +20,8 @@ from renderers_content import (
     render_content_3extra,
     render_content_4_a,
     render_content_4_b,
+    _adjust_title_background
 )
-
 SLIDE_RENDERERS = {}
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -1074,6 +1074,7 @@ def render_table_slide(slide, slide_spec):
     keep_names = {"title", "sheet_1"}
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
     fill_table(slide, "sheet_1", slide_spec.get("columns", []), slide_spec.get("rows", []))
+    _adjust_title_background(slide)  
     return keep_names
 
 
@@ -1082,6 +1083,7 @@ def render_flow(slide, slide_spec):
     keep_names = {"title"}
     set_text(slide, "title", str(slide_spec.get("title", "")), no_wrap=True, single_line=True)
     steps = slide_spec.get("steps", [])
+    _adjust_title_background(slide)  
 
     prefer_name = _resolve_flow_prefer_name(slide, slide_spec)
     if prefer_name:

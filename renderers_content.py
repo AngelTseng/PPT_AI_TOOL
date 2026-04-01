@@ -1,5 +1,27 @@
-from renderer_helper import set_text, shape_by_name
+from renderer_helper import apply_images_to_placeholders, set_text, shape_by_name
 
+def _adjust_title_background(slide):
+    title = shape_by_name(slide, "title")
+    bg = shape_by_name(slide, "矩形: 剪去同側角落 ")  
+
+    if not title or not bg:
+        return
+
+    try:
+        padding = 2
+
+        # 👉 目標底部
+        target_bottom = title.Top + title.Width + padding
+
+        # 👉 新高度（Top 不動，只往下長）
+        new_height = target_bottom - bg.Top
+
+        # 👉 只允許變大（避免縮回去）
+        if new_height > bg.Height:
+            bg.Height = new_height
+
+    except Exception as e:
+        print("[WARN] adjust title background failed:", e)
 
 def render_content_image(slide, slide_spec):
     keep_names = set()
@@ -11,6 +33,12 @@ def render_content_image(slide, slide_spec):
     if shape_by_name(slide, "content"):
         keep_names.add("content")
         set_text(slide, "content", str(slide_spec.get("content", "")))
+
+    keep_names |= apply_images_to_placeholders(
+        slide,
+        slide_spec,
+        ["img", "main_image", "img_1", "img_2"],
+    )
 
     return keep_names
 
@@ -43,6 +71,7 @@ def render_content_2_a(slide, slide_spec):
             keep_names.add(content_name)
             set_text(slide, content_name, content_text)
 
+    keep_names |= apply_images_to_placeholders(slide, slide_spec, ["img_1", "img_2", "img"])
     return keep_names
 
 
@@ -70,6 +99,7 @@ def render_content_2_b(slide, slide_spec):
             keep_names.add(content_name)
             set_text(slide, content_name, content_text)
 
+    keep_names |= apply_images_to_placeholders(slide, slide_spec, ["img_1", "img_2", "img"])
     return keep_names
 
 

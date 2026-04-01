@@ -1,7 +1,7 @@
 # ============================================================
 # Renderer Helper (Shared Utilities)
 # ============================================================
-
+import os
 MsoTrue = -1
 MsoFalse = 0
 
@@ -248,3 +248,74 @@ def set_text(
             pass
 
     return True
+
+
+def replace_picture(slide, target_shape_name: str, image_path: str) -> bool:
+    if not image_path or not os.path.exists(image_path):
+        return False
+
+    target = shape_by_name(slide, target_shape_name)
+    if target is None:
+        return False
+
+    try:
+        left = target.Left
+        top = target.Top
+        width = target.Width
+        height = target.Height
+    except Exception:
+        return False
+
+    try:
+        target.Delete()
+    except Exception:
+        pass
+
+    try:
+        new_pic = slide.Shapes.AddPicture(
+            FileName=os.path.abspath(image_path),
+            LinkToFile=False,
+            SaveWithDocument=True,
+            Left=left,
+            Top=top,
+            Width=width,
+            Height=height,
+        )
+        new_pic.Name = target_shape_name
+        return True
+    except Exception as e:
+        print(f"[WARN] Failed to replace picture '{target_shape_name}': {e}")
+        return False
+
+
+def apply_images_to_placeholders(slide, slide_spec: dict, placeholder_names: list[str]) -> set:
+    kept = set()
+    images = slide_spec.get("images", []) or []
+    if not isinstance(images, list):
+        return kept
+
+    unused = []
+    by_shape_name = {}
+    for img in images:
+        if not isinstance(img, dict):
+            continue
+        path = str(img.get("image_path", "")).strip()
+        if not path:
+            continue
+        img_shape_name = str(img.get("shape_name", "")).strip().lower()
+        if img_shape_name:
+            by_shape_name[img_shape_name] = path
+        unused.append(path)
+
+    for shape_name in placeholder_names:
+        if not shape_by_name(slide, shape_name):
+            continue
+
+        path = by_shape_name.get(str(shape_name).strip().lower())
+        if not path and unused:
+            path = unused.pop(0)
+
+        if path and replace_picture(slide, shape_name, path):
+            kept.add(shape_name)
+
+    return kept

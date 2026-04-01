@@ -520,7 +520,7 @@
     "detected_type": "content_2_a",
     "shapes": [
       {
-        "name": "矩形: 剪去單一角落 3",
+        "name": "矩形: 剪去同側角落 ",
         "is_placeholder": false,
         "has_text": true,
         "has_table": false,
@@ -677,7 +677,7 @@
     "detected_type": "table",
     "shapes": [
       {
-        "name": "矩形: 剪去同側角落 1",
+        "name": "矩形: 剪去同側角落 ",
         "is_placeholder": false,
         "has_text": true,
         "has_table": false,
@@ -717,7 +717,7 @@
     "detected_type": "content_image",
     "shapes": [
       {
-        "name": "矩形: 剪去同側角落 5",
+        "name": "矩形: 剪去同側角落 ",
         "is_placeholder": false,
         "has_text": true,
         "has_table": false,
@@ -1115,7 +1115,7 @@
     "detected_type": "flow",
     "shapes": [
       {
-        "name": "矩形: 剪去同側角落 1",
+        "name": "矩形: 剪去同側角落 ",
         "is_placeholder": false,
         "has_text": true,
         "has_table": false,
@@ -1155,7 +1155,7 @@
     "detected_type": "flow",
     "shapes": [
       {
-        "name": "矩形: 剪去同側角落 1",
+        "name": "矩形: 剪去同側角落 ",
         "is_placeholder": false,
         "has_text": true,
         "has_table": false,
@@ -1195,7 +1195,7 @@
     "detected_type": "flow",
     "shapes": [
       {
-        "name": "矩形: 剪去同側角落 1",
+        "name": "矩形: 剪去同側角落 ",
         "is_placeholder": false,
         "has_text": true,
         "has_table": false,
