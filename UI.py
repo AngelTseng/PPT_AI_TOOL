@@ -199,11 +199,51 @@ def show_result_box(title: str, result: dict | None, clear_key: str):
 
         preview_images = result.get("preview_images", [])
         if preview_images:
-            with st.expander("👀 PPT Preview", expanded=False):
-                for idx, image_path in enumerate(preview_images, start=1):
-                    st.image(image_path, caption=f"Slide {idx}", use_container_width=True)
+            preview_state_key = f"{clear_key}_preview_index"
+            if preview_state_key not in st.session_state:
+                st.session_state[preview_state_key] = 0
+
+            max_idx = len(preview_images) - 1
+            current_idx = st.session_state[preview_state_key]
+            if current_idx < 0:
+                current_idx = 0
+            if current_idx > max_idx:
+                current_idx = max_idx
+            st.session_state[preview_state_key] = current_idx
+
+            st.markdown("#### 👀 PPT Preview")
+            st.caption("固定預覽視窗，可用上一頁/下一頁切換。")
+
+            nav_left, nav_mid, nav_right = st.columns([1, 2, 1])
+            with nav_left:
+                if st.button("⬅ 上一頁", key=f"{clear_key}_prev", use_container_width=True):
+                    st.session_state[preview_state_key] = max(0, st.session_state[preview_state_key] - 1)
+                    st.rerun()
+            with nav_mid:
+                st.markdown(
+                    f"<div style='text-align:center; font-weight:600;'>Slide {st.session_state[preview_state_key] + 1} / {len(preview_images)}</div>",
+                    unsafe_allow_html=True,
+                )
+            with nav_right:
+                if st.button("下一頁 ➡", key=f"{clear_key}_next", use_container_width=True):
+                    st.session_state[preview_state_key] = min(max_idx, st.session_state[preview_state_key] + 1)
+                    st.rerun()
+
+            st.markdown(
+                "<div style='border:1px solid #d0d5dd; border-radius:10px; padding:12px; background:#fafafa;'>",
+                unsafe_allow_html=True,
+            )
+            st.image(
+                preview_images[st.session_state[preview_state_key]],
+                caption=f"Slide {st.session_state[preview_state_key] + 1}",
+                use_container_width=True,
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
 
         if st.button("🗑 Clear result", key=clear_key, use_container_width=True):
+            preview_state_key = f"{clear_key}_preview_index"
+            if preview_state_key in st.session_state:
+                del st.session_state[preview_state_key]
             return "clear"
 
 def build_word_prompt(word_payload: dict, duration_mode: str) -> str:
