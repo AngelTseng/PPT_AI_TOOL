@@ -4,3 +4,4 @@ python-pptx
 pydantic
 openai
 tqdm
+openpyxl
