@@ -14,6 +14,8 @@ from spec_validator import validate_deck_spec
 from ppt_renderer import render_deck
 from llm_beautify_spec import beautify_spec
 from extract_word_content import extract_word_to_payload
+from extract_excel_content import extract_excel_to_payload
+from excel_to_spec import excel_payload_to_spec
 
 import platform  
 import shutil   
@@ -249,6 +251,9 @@ if "beautify_result" not in st.session_state:
 if "word_generate_result" not in st.session_state:
     st.session_state.word_generate_result = None
 
+if "excel_generate_result" not in st.session_state:
+    st.session_state.excel_generate_result = None
+
 st.title("📊 AI PPT Tool")
 st.caption("Generate, beautify, and render PowerPoint presentations using your company template.")
 
@@ -338,6 +343,7 @@ with st.sidebar:
             "Generate from prompt",
             "Beautify existing PPT",
             "Generate from Word",
+            "Generate from Excel",
         ]
     )
     
@@ -685,4 +691,111 @@ elif mode == "Generate from Word":
 
     if clear_action == "clear":
         st.session_state.word_generate_result = None
+        st.rerun()
+
+
+# ==========================
+# Mode 4: Generate from Excel
+# ==========================
+elif mode == "Generate from Excel":
+    st.subheader("Mode 4 · Generate PPT from Excel")
+
+    uploaded_xlsx = st.file_uploader(
+        "Upload an Excel file",
+        type=["xlsx"],
+        key="upload_xlsx_mode4"
+    )
+
+    run_generate_excel = st.button(
+        "Generate PPT",
+        type="primary",
+        use_container_width=True,
+        key="generate_excel_btn"
+    )
+
+    if run_generate_excel:
+        if uploaded_xlsx is None:
+            st.error("Please upload an Excel file first.")
+        else:
+            try:
+                runner = StepRunner("Generating PPT from Excel.", total_steps=6, show_logs=show_logs)
+
+                input_xlsx_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_xlsx.name}"
+                save_uploaded_file(uploaded_xlsx, input_xlsx_path)
+
+                runner.update("Extracting workbook/sheet/block payload")
+                excel_payload = run_with_spinner(
+                    "Reading Excel content.",
+                    extract_excel_to_payload,
+                    str(input_xlsx_path)
+                )
+
+                if show_debug:
+                    pretty_json_block("Extracted Excel payload", excel_payload)
+
+                runner.update("Mapping payload to deck spec")
+                generated_spec = run_with_spinner(
+                    "Mapping Excel payload to slide spec.",
+                    excel_payload_to_spec,
+                    excel_payload
+                )
+
+                if show_debug:
+                    pretty_json_block("Generated Excel slide spec", generated_spec)
+
+                runner.update("Normalizing spec")
+                normalized_spec = normalize_beautified_spec(generated_spec)
+
+                if show_debug:
+                    pretty_json_block("Normalized spec", normalized_spec)
+
+                runner.update("Validating spec", kind="warn")
+                result = validate_deck_spec(normalized_spec)
+                if result["errors"]:
+                    raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
+
+                show_warnings(result)
+
+                runner.update("Rendering PPT", kind="ok")
+                output_pptx = OUTPUT_DIR / f"excel_generated_{timestamp_str()}.pptx"
+                run_with_spinner(
+                    "Rendering PowerPoint.",
+                    render_deck,
+                    template_pptx=str(TEMPLATE_PATH),
+                    deck_spec=result["normalized_spec"],
+                    out_pptx=str(output_pptx)
+                )
+
+                runner.success("PPT ready")
+
+                st.session_state.excel_generate_result = {
+                    "summary": f"Latest generated file: {output_pptx.name}",
+                    "files": [
+                        {
+                            "label": "Download PPT",
+                            "path": str(output_pptx),
+                            "name": output_pptx.name,
+                            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                        }
+                    ],
+                    "preview_images": export_ppt_preview_images(output_pptx)
+                }
+
+            except Exception as e:
+                if "runner" in locals():
+                    runner.error(f"Excel generate failed: {e}")
+                else:
+                    st.error(f"Excel generate failed: {e}")
+
+                with st.expander("Error details"):
+                    st.code(traceback.format_exc())
+
+    clear_action = show_result_box(
+        "Excel generate result ready",
+        st.session_state.excel_generate_result,
+        clear_key="clear_excel_generate"
+    )
+
+    if clear_action == "clear":
+        st.session_state.excel_generate_result = None
         st.rerun()
