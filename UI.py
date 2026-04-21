@@ -214,20 +214,10 @@ def show_result_box(title: str, result: dict | None, clear_key: str):
             st.markdown("#### 👀 PPT Preview")
             st.caption("固定預覽視窗，可用上一頁/下一頁切換。")
 
-            nav_left, nav_mid, nav_right = st.columns([1, 2, 1])
-            with nav_left:
-                if st.button("⬅ 上一頁", key=f"{clear_key}_prev", use_container_width=True):
-                    st.session_state[preview_state_key] = max(0, st.session_state[preview_state_key] - 1)
-                    st.rerun()
-            with nav_mid:
-                st.markdown(
-                    f"<div style='text-align:center; font-weight:600;'>Slide {st.session_state[preview_state_key] + 1} / {len(preview_images)}</div>",
-                    unsafe_allow_html=True,
-                )
-            with nav_right:
-                if st.button("下一頁 ➡", key=f"{clear_key}_next", use_container_width=True):
-                    st.session_state[preview_state_key] = min(max_idx, st.session_state[preview_state_key] + 1)
-                    st.rerun()
+            st.markdown(
+                f"<div style='text-align:center; font-weight:600; margin-bottom:8px;'>Slide {st.session_state[preview_state_key] + 1} / {len(preview_images)}</div>",
+                unsafe_allow_html=True,
+            )
 
             st.markdown(
                 "<div style='border:1px solid #d0d5dd; border-radius:10px; padding:12px; background:#fafafa;'>",
@@ -239,6 +229,19 @@ def show_result_box(title: str, result: dict | None, clear_key: str):
                 use_container_width=True,
             )
             st.markdown("</div>", unsafe_allow_html=True)
+
+            with st.container(key=f"{clear_key}_preview_nav"):
+                nav_left, nav_mid, nav_right = st.columns([1, 0.2, 1])
+                with nav_left:
+                    if st.button("⬅ 上一頁", key=f"{clear_key}_prev", use_container_width=True):
+                        st.session_state[preview_state_key] = max(0, st.session_state[preview_state_key] - 1)
+                        st.rerun()
+                with nav_mid:
+                    st.write("")
+                with nav_right:
+                    if st.button("下一頁 ➡", key=f"{clear_key}_next", use_container_width=True):
+                        st.session_state[preview_state_key] = min(max_idx, st.session_state[preview_state_key] + 1)
+                        st.rerun()
 
         if st.button("🗑 Clear result", key=clear_key, use_container_width=True):
             preview_state_key = f"{clear_key}_preview_index"
@@ -335,6 +338,20 @@ st.markdown("""
 
     [class*="st-key-result_box_clear_"] .stButton > button[kind="secondary"]:hover {
         background-color: #ffd6d6;
+    }
+
+    /* ===== Preview Nav Buttons (light blue style) ===== */
+    [class*="_preview_nav"] .stButton > button {
+        background-color: #e9f3ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    [class*="_preview_nav"] .stButton > button:hover {
+        background-color: #dbeafe;
+        color: #1e40af;
     }
 
 
