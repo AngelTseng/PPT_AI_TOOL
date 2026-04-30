@@ -309,475 +309,195 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 with st.sidebar:
-    st.header("Mode")
-    mode = st.radio(
-        "Choose workflow",
-        [
-            "Generate from prompt",
-            "Beautify existing PPT",
-            "Generate from Word",
-            "Generate from Excel",
-            "Generate from PDF",
-        ]
-    )
-    
+    st.header("Settings")
     st.write("Template:")
     st.code(str(TEMPLATE_PATH.name))
-    show_debug = st.checkbox("Show intermediate JSON", value=True)
-    show_logs = st.checkbox("Show step status", value=True)
-# =========================
-# Mode 1: Generate from prompt
-# =========================
-if mode == "Generate from prompt":
-    st.subheader("Mode 1 · Generate PPT from prompt")
-    prompt = st.text_area(
-        "Describe the presentation you want",
-        height=220,
-        placeholder="Example: Create a 5-slide presentation about AI networking trends..."
-    )
-    run_generate = st.button(
-        "Generate PPT",
-        type="primary",
-        use_container_width=True,
-        key="generate_btn"
-    )
-    if run_generate:
-        if not prompt.strip():
-            st.error("Please enter a prompt first.")
-        else:
-            try:
-                runner = StepRunner("Generating presentation...", total_steps=4, show_logs=show_logs)
-                runner.update("Generating deck spec with LLM")
-                generated_spec = run_with_spinner(
-                    "LLM is generating slide spec...",
-                    generate_spec,
-                    prompt
-                )
-                if show_debug:
-                    pretty_json_block("Generated spec", generated_spec)
-                runner.update("Normalizing spec")
-                normalized_spec = normalize_beautified_spec(generated_spec)
-                if show_debug:
-                    pretty_json_block("Normalized spec", normalized_spec)
-                runner.update("Validating spec", kind="warn")
-                result = validate_deck_spec(normalized_spec)
-                if result["errors"]:
-                    raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
-                show_warnings(result)
-                
-                
-                runner.update("Rendering PPT", kind="ok")
-                out_path = OUTPUT_DIR / f"generated_{timestamp_str()}.pptx"
-                run_with_spinner(
-                    "Rendering PowerPoint...",
-                    render_deck,
-                    template_pptx=str(TEMPLATE_PATH),
-                    deck_spec=result["normalized_spec"],
-                    out_pptx=str(out_path)
-                )
-                runner.success("PPT ready")
-                st.session_state.generate_result = {
-                    "summary": f"Latest generated file: {out_path.name}",
-                    "files": [
-                        {
-                            "label": "Download PPT",
-                            "path": str(out_path),
-                            "name": out_path.name,
-                            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                        }
-                    ],
-                    "preview_images": export_ppt_preview_images(out_path)
-                }
-            except Exception as e:
-                if "runner" in locals():
-                    runner.error(f"Generate failed: {e}")
-                else:
-                    st.error(f"Generate failed: {e}")
-                with st.expander("Error details"):
-                    st.code(traceback.format_exc())
-    clear_action = show_result_box(
-        "Generate result ready",
-        st.session_state.generate_result,
-        clear_key="clear_generate"
-    )
-    if clear_action == "clear":
-        st.session_state.generate_result = None
-        st.rerun()
-                            
-      
-# ==========================
-# Mode 2: Beautify existing PPT
-# ==========================
-elif mode == "Beautify existing PPT":
-    st.subheader("Mode 2 · Beautify existing PPT")
-    uploaded_ppt = st.file_uploader(
-        "Upload a PPTX file",
-        type=["pptx"],
-        key="upload_ppt_mode2"
-    )
-    run_beautify = st.button(
-        "Beautify PPT",
-        type="primary",
-        use_container_width=True,
-        key="beautify_btn"
-    )
-    if run_beautify:
-        if uploaded_ppt is None:
-            st.error("Please upload a PPT file first.")
-        else:
-            try:
+    with st.expander("Advanced / Debug", expanded=False):
+        show_debug = st.checkbox("Show intermediate JSON", value=False)
+        show_logs = st.checkbox("Show step status", value=False)
+        st.caption("Template information")
+        st.code(str(TEMPLATE_PATH))
+
+
+def summarize_uploaded_files(file_groups: dict[str, list]):
+    labels = {
+        "word": "Word content",
+        "excel": "Excel data",
+        "pdf": "PDF reference",
+        "pptx": "PPT reference / existing deck",
+        "txt": "Text notes",
+    }
+    st.markdown("### Detected files summary")
+    has_any = False
+    for group_key in ["word", "excel", "pdf", "pptx", "txt"]:
+        for uploaded in file_groups[group_key]:
+            has_any = True
+            st.write(f"- {uploaded.name} → {labels[group_key]}")
+    if not has_any:
+        st.caption("No files uploaded yet.")
+
+
+def build_integrated_prompt(base_prompt: str, payload_texts: list[str]) -> str:
+    sections = []
+    if base_prompt.strip():
+        sections.append(f"User requirement:\n{base_prompt.strip()}")
+    if payload_texts:
+        sections.append("Source materials:\n" + "\n\n".join(payload_texts))
+    if not sections:
+        sections.append("Create a professional presentation based on uploaded materials.")
+    return "\n\n".join(sections)
+
+
+st.subheader("Create PPT with unified input flow")
+prompt = st.text_area(
+    "1) Describe your presentation",
+    height=220,
+    placeholder="Example: Create a 10-slide technical presentation based on the uploaded Word report and Excel data."
+)
+uploaded_files = st.file_uploader(
+    "2) Upload materials",
+    type=["pptx", "docx", "pdf", "xlsx", "xls", "txt"],
+    accept_multiple_files=True,
+    key="upload_unified_inputs"
+)
+st.caption("Support: PowerPoint, Word, PDF, Excel, TXT. You may upload multiple files and the tool will organize them into one PPT.")
+
+file_groups = {
+    "pptx": [],
+    "word": [],
+    "pdf": [],
+    "excel": [],
+    "txt": [],
+    "unsupported": [],
+}
+
+for uploaded in (uploaded_files or []):
+    ext = uploaded.name.lower().split(".")[-1] if "." in uploaded.name else ""
+    if ext == "pptx":
+        file_groups["pptx"].append(uploaded)
+    elif ext == "docx":
+        file_groups["word"].append(uploaded)
+    elif ext == "pdf":
+        file_groups["pdf"].append(uploaded)
+    elif ext in ["xlsx", "xls"]:
+        file_groups["excel"].append(uploaded)
+    elif ext == "txt":
+        file_groups["txt"].append(uploaded)
+    else:
+        file_groups["unsupported"].append(uploaded)
+
+if file_groups["unsupported"]:
+    st.warning("Unsupported files are skipped: " + ", ".join(f.name for f in file_groups["unsupported"]))
+
+summarize_uploaded_files(file_groups)
+
+has_prompt = bool(prompt.strip())
+processable_count = sum(len(file_groups[k]) for k in ["pptx", "word", "pdf", "excel", "txt"])
+only_single_pptx = len(file_groups["pptx"]) == 1 and processable_count == 1
+
+if only_single_pptx and not has_prompt:
+    workflow = "beautify_existing_ppt"
+    st.info("Detected workflow: Beautify existing PPT")
+else:
+    workflow = "generate_integrated_ppt"
+    st.info("Detected workflow: Generate integrated PPT")
+
+run_main = st.button("Generate PPT", type="primary", use_container_width=True, key="generate_unified_btn")
+
+if run_main:
+    if processable_count == 0 and not has_prompt:
+        st.error("Please enter requirements or upload at least one supported file.")
+    else:
+        try:
+            if workflow == "beautify_existing_ppt":
+                uploaded_ppt = file_groups["pptx"][0]
                 runner = StepRunner("Beautifying PPT.", total_steps=6, show_logs=show_logs)
-                # 1️⃣ Save uploaded file
                 input_ppt_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_ppt.name}"
                 save_uploaded_file(uploaded_ppt, input_ppt_path)
                 runner.update("Extracting content from PPT")
-                extracted_spec = run_with_spinner(
-                    "Reading PPT content.",
-                    extract_ppt_to_spec,
-                    str(input_ppt_path)
-                )
+                extracted_spec = run_with_spinner("Reading PPT content.", extract_ppt_to_spec, str(input_ppt_path))
                 if show_debug:
                     pretty_json_block("Extracted spec", extracted_spec)
-                # 2️⃣ Beautify (LLM)
                 runner.update("Beautifying content with LLM")
-                beautified_spec = run_with_spinner(
-                    "LLM is improving the slide content.",
-                    beautify_spec,
-                    extracted_spec
-                )
+                beautified_spec = run_with_spinner("LLM is improving the slide content.", beautify_spec, extracted_spec)
                 if show_debug:
                     pretty_json_block("Beautified spec", beautified_spec)
-                # 3️⃣ Normalize
                 runner.update("Normalizing spec")
                 normalized_spec = normalize_beautified_spec(beautified_spec)
-                if show_debug:
-                    pretty_json_block("Normalized spec", normalized_spec)
-                # 4️⃣ Validate
                 runner.update("Validating spec", kind="warn")
                 result = validate_deck_spec(normalized_spec)
                 if result["errors"]:
                     raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
-                show_warnings(result)
-                # 5️⃣ Render PPT
                 runner.update("Rendering PPT", kind="ok")
                 output_pptx = OUTPUT_DIR / f"beautified_{timestamp_str()}.pptx"
-                run_with_spinner(
-                    "Rendering PowerPoint.",
-                    render_deck,
-                    template_pptx=str(TEMPLATE_PATH),
-                    deck_spec=result["normalized_spec"],
-                    out_pptx=str(output_pptx)
-                )
-                # 6️⃣ Done
+                run_with_spinner("Rendering PowerPoint.", render_deck, template_pptx=str(TEMPLATE_PATH), deck_spec=result["normalized_spec"], out_pptx=str(output_pptx))
                 runner.success("Beautified PPT ready")
-                st.session_state.beautify_result = {
-                    "summary": f"Latest beautified file: {output_pptx.name}",
-                    "files": [
-                        {
-                            "label": "Download PPT",
-                            "path": str(output_pptx),
-                            "name": output_pptx.name,
-                            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                        }
-                    ],
-                    "preview_images": export_ppt_preview_images(output_pptx)
-                }
-            except Exception as e:
-                if "runner" in locals():
-                    runner.error(f"Beautify failed: {e}")
-                else:
-                    st.error(f"Beautify failed: {e}")
-                with st.expander("Error details"):
-                    st.code(traceback.format_exc())
-    # 顯示結果
-    if st.session_state.beautify_result:
-        clear_action = show_result_box(
-            "Beautify result ready",
-            st.session_state.beautify_result,
-            clear_key="clear_beautify"
-        )
-        if clear_action == "clear":
-            st.session_state.beautify_result = None
-            st.rerun()
-                            
-# ==========================
-# Mode 3: Generate from Word
-# ==========================
- 
- 
-elif mode == "Generate from Word":
-    st.subheader("Mode 3 · Generate PPT from Word")
-    uploaded_docx = st.file_uploader(
-        "Upload a Word file",
-        type=["docx"],
-        key="upload_docx_mode3"
-    )
-    duration_mode = st.radio(
-        "Choose report duration",
-        ["10-15 min", "16-30 min"],
-        horizontal=True
-    )
-    run_generate_word = st.button(
-        "Generate PPT",
-        type="primary",
-        use_container_width=True,
-        key="generate_word_btn"
-    )
-    if run_generate_word:
-        if uploaded_docx is None:
-            st.error("Please upload a Word file first.")
-        else:
-            try:
-                runner = StepRunner("Generating PPT from Word.", total_steps=6, show_logs=show_logs)
-                input_docx_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_docx.name}"
-                save_uploaded_file(uploaded_docx, input_docx_path)
-                runner.update("Extracting content from Word")
-                word_payload = run_with_spinner(
-                    "Reading Word content.",
-                    extract_word_to_payload,
-                    str(input_docx_path)
-                )
+            else:
+                runner = StepRunner("Generating integrated PPT.", total_steps=6, show_logs=show_logs)
+                payload_sections = []
+                runner.update("Processing uploaded materials")
+                for uploaded_docx in file_groups["word"]:
+                    pth = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_docx.name}"
+                    save_uploaded_file(uploaded_docx, pth)
+                    word_payload = run_with_spinner("Reading Word content.", extract_word_to_payload, str(pth))
+                    payload_sections.append(f"[WORD] {uploaded_docx.name}\n{word_payload.get('raw_text', '')}")
+                for uploaded_pdf in file_groups["pdf"]:
+                    pth = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_pdf.name}"
+                    save_uploaded_file(uploaded_pdf, pth)
+                    pdf_payload = run_with_spinner("Reading PDF content.", extract_pdf_to_payload, str(pth))
+                    payload_sections.append(f"[PDF] {uploaded_pdf.name}\n{pdf_payload.get('raw_text', '')}")
+                for uploaded_excel in file_groups["excel"]:
+                    pth = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_excel.name}"
+                    save_uploaded_file(uploaded_excel, pth)
+                    excel_payload = run_with_spinner("Reading Excel content.", extract_excel_to_payload, str(pth))
+                    payload_sections.append(f"[EXCEL] {uploaded_excel.name}\n" + json.dumps(excel_payload, ensure_ascii=False)[:8000])
+                for uploaded_txt in file_groups["txt"]:
+                    txt_content = uploaded_txt.getvalue().decode("utf-8", errors="ignore")
+                    payload_sections.append(f"[TXT] {uploaded_txt.name}\n{txt_content}")
+                for uploaded_ppt in file_groups["pptx"]:
+                    pth = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_ppt.name}"
+                    save_uploaded_file(uploaded_ppt, pth)
+                    ppt_spec = run_with_spinner("Reading PPT content.", extract_ppt_to_spec, str(pth))
+                    payload_sections.append(f"[PPTX] {uploaded_ppt.name}\n" + json.dumps(ppt_spec, ensure_ascii=False)[:8000])
                 if show_debug:
-                    pretty_json_block("Extracted Word content", word_payload)
+                    pretty_json_block("Material summary", {"sections": payload_sections})
                 runner.update("Generating draft spec with LLM")
-                generated_spec = run_with_spinner(
-                    "LLM is generating slide spec from Word.",
-                    generate_spec,
-                    build_word_prompt(word_payload, duration_mode)
-                )
+                integrated_prompt = build_integrated_prompt(prompt, payload_sections)
+                generated_spec = run_with_spinner("LLM is generating slide spec.", generate_spec, integrated_prompt)
                 if show_debug:
                     pretty_json_block("Generated draft spec", generated_spec)
                 runner.update("Beautifying spec with LLM")
-                beautified_spec = run_with_spinner(
-                    "LLM is refining the slide spec.",
-                    beautify_spec,
-                    generated_spec
-                )
-                if show_debug:
-                    pretty_json_block("Beautified spec", beautified_spec)
+                beautified_spec = run_with_spinner("LLM is refining the slide spec.", beautify_spec, generated_spec)
                 runner.update("Normalizing spec")
                 normalized_spec = normalize_beautified_spec(beautified_spec)
-                if show_debug:
-                    pretty_json_block("Normalized spec", normalized_spec)
                 runner.update("Validating spec", kind="warn")
                 result = validate_deck_spec(normalized_spec)
                 if result["errors"]:
                     raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
-                show_warnings(result)
                 runner.update("Rendering PPT", kind="ok")
-                output_pptx = OUTPUT_DIR / f"word_generated_{timestamp_str()}.pptx"
-                run_with_spinner(
-                    "Rendering PowerPoint.",
-                    render_deck,
-                    template_pptx=str(TEMPLATE_PATH),
-                    deck_spec=result["normalized_spec"],
-                    out_pptx=str(output_pptx)
-                )
-                runner.success("PPT ready")
-                st.session_state.word_generate_result = {
-                    "summary": f"Latest generated file: {output_pptx.name}",
-                    "files": [
-                        {
-                            "label": "Download PPT",
-                            "path": str(output_pptx),
-                            "name": output_pptx.name,
-                            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                        }
-                    ],
-                    "preview_images": export_ppt_preview_images(output_pptx)
-                }
-            except Exception as e:
-                if "runner" in locals():
-                    runner.error(f"Word generate failed: {e}")
-                else:
-                    st.error(f"Word generate failed: {e}")
-                with st.expander("Error details"):
-                    st.code(traceback.format_exc())
-    clear_action = show_result_box(
-        "Word generate result ready",
-        st.session_state.word_generate_result,
-        clear_key="clear_word_generate"
-    )
-    if clear_action == "clear":
-        st.session_state.word_generate_result = None
-        st.rerun()
-# ==========================
-# Mode 4: Generate from Excel
-# ==========================
-elif mode == "Generate from Excel":
-    st.subheader("Mode 4 · Generate PPT from Excel")
-    uploaded_xlsx = st.file_uploader(
-        "Upload an Excel file",
-        type=["xlsx"],
-        key="upload_xlsx_mode4"
-    )
-    run_generate_excel = st.button(
-        "Generate PPT",
-        type="primary",
-        use_container_width=True,
-        key="generate_excel_btn"
-    )
-    if run_generate_excel:
-        if uploaded_xlsx is None:
-            st.error("Please upload an Excel file first.")
-        else:
-            try:
-                runner = StepRunner("Generating PPT from Excel.", total_steps=6, show_logs=show_logs)
-                input_xlsx_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_xlsx.name}"
-                save_uploaded_file(uploaded_xlsx, input_xlsx_path)
-                runner.update("Extracting workbook/sheet/block payload")
-                excel_payload = run_with_spinner(
-                    "Reading Excel content.",
-                    extract_excel_to_payload,
-                    str(input_xlsx_path)
-                )
-                if show_debug:
-                    pretty_json_block("Extracted Excel payload", excel_payload)
-                runner.update("Mapping payload to deck spec")
-                generated_spec = run_with_spinner(
-                    "Mapping Excel payload to slide spec.",
-                    excel_payload_to_spec,
-                    excel_payload
-                )
-                if show_debug:
-                    pretty_json_block("Generated Excel slide spec", generated_spec)
-                runner.update("Normalizing spec")
-                normalized_spec = normalize_beautified_spec(generated_spec)
-                if show_debug:
-                    pretty_json_block("Normalized spec", normalized_spec)
-                runner.update("Validating spec", kind="warn")
-                result = validate_deck_spec(normalized_spec)
-                if result["errors"]:
-                    raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
-                show_warnings(result)
-                runner.update("Rendering PPT", kind="ok")
-                output_pptx = OUTPUT_DIR / f"excel_generated_{timestamp_str()}.pptx"
-                run_with_spinner(
-                    "Rendering PowerPoint.",
-                    render_deck,
-                    template_pptx=str(TEMPLATE_PATH),
-                    deck_spec=result["normalized_spec"],
-                    out_pptx=str(output_pptx)
-                )
-                runner.success("PPT ready")
-                st.session_state.excel_generate_result = {
-                    "summary": f"Latest generated file: {output_pptx.name}",
-                    "files": [
-                        {
-                            "label": "Download PPT",
-                            "path": str(output_pptx),
-                            "name": output_pptx.name,
-                            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                        }
-                    ],
-                    "preview_images": export_ppt_preview_images(output_pptx)
-                }
-            except Exception as e:
-                if "runner" in locals():
-                    runner.error(f"Excel generate failed: {e}")
-                else:
-                    st.error(f"Excel generate failed: {e}")
-                with st.expander("Error details"):
-                    st.code(traceback.format_exc())
-    clear_action = show_result_box(
-        "Excel generate result ready",
-        st.session_state.excel_generate_result,
-        clear_key="clear_excel_generate"
-    )
-    if clear_action == "clear":
-        st.session_state.excel_generate_result = None
-        st.rerun()
-# ==========================
-# Mode 5: Generate from PDF
-# ==========================
-elif mode == "Generate from PDF":
-    st.subheader("Mode 5 · Generate PPT from PDF")
-    uploaded_pdf = st.file_uploader(
-        "Upload a PDF file",
-        type=["pdf"],
-        key="upload_pdf_mode5"
-    )
-    run_generate_pdf = st.button(
-        "Generate PPT",
-        type="primary",
-        use_container_width=True,
-        key="generate_pdf_btn"
-    )
-    if run_generate_pdf:
-        if uploaded_pdf is None:
-            st.error("Please upload a PDF file first.")
-        else:
-            try:
-                runner = StepRunner("Generating PPT from PDF.", total_steps=6, show_logs=show_logs)
-                input_pdf_path = OUTPUT_DIR / f"uploaded_{timestamp_str()}_{uploaded_pdf.name}"
-                save_uploaded_file(uploaded_pdf, input_pdf_path)
-                runner.update("Extracting content from PDF")
-                pdf_payload = run_with_spinner(
-                    "Reading PDF content.",
-                    extract_pdf_to_payload,
-                    str(input_pdf_path)
-                )
-                if show_debug:
-                    pretty_json_block("Extracted PDF content", pdf_payload)
-                runner.update("Generating draft spec with LLM")
-                generated_spec = run_with_spinner(
-                    "LLM is generating slide spec from PDF.",
-                    generate_spec,
-                    build_word_prompt(pdf_payload, "16-30 min")
-                )
-                if show_debug:
-                    pretty_json_block("Generated draft spec", generated_spec)
-                runner.update("Beautifying spec with LLM")
-                beautified_spec = run_with_spinner(
-                    "LLM is refining the slide spec.",
-                    beautify_spec,
-                    generated_spec
-                )
-                if show_debug:
-                    pretty_json_block("Beautified spec", beautified_spec)
-                runner.update("Normalizing spec")
-                normalized_spec = normalize_beautified_spec(beautified_spec)
-                if show_debug:
-                    pretty_json_block("Normalized spec", normalized_spec)
-                runner.update("Validating spec", kind="warn")
-                result = validate_deck_spec(normalized_spec)
-                if result["errors"]:
-                    raise ValueError("Validation failed:\n" + "\n".join(result["errors"]))
-                show_warnings(result)
-                runner.update("Rendering PPT", kind="ok")
-                output_pptx = OUTPUT_DIR / f"pdf_generated_{timestamp_str()}.pptx"
-                run_with_spinner(
-                    "Rendering PowerPoint.",
-                    render_deck,
-                    template_pptx=str(TEMPLATE_PATH),
-                    deck_spec=result["normalized_spec"],
-                    out_pptx=str(output_pptx)
-                )
-                runner.success("PPT ready")
-                st.session_state.pdf_generate_result = {
-                    "summary": f"Latest generated file: {output_pptx.name}",
-                    "files": [
-                        {
-                            "label": "Download PPT",
-                            "path": str(output_pptx),
-                            "name": output_pptx.name,
-                            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                        }
-                    ],
-                    "preview_images": export_ppt_preview_images(output_pptx)
-                }
-            except Exception as e:
-                if "runner" in locals():
-                    runner.error(f"PDF generate failed: {e}")
-                else:
-                    st.error(f"PDF generate failed: {e}")
-                with st.expander("Error details"):
-                    st.code(traceback.format_exc())
-    clear_action = show_result_box(
-        "PDF generate result ready",
-        st.session_state.pdf_generate_result,
-        clear_key="clear_pdf_generate"
-    )
-    if clear_action == "clear":
-        st.session_state.pdf_generate_result = None
-        st.rerun()
+                output_pptx = OUTPUT_DIR / f"integrated_{timestamp_str()}.pptx"
+                run_with_spinner("Rendering PowerPoint.", render_deck, template_pptx=str(TEMPLATE_PATH), deck_spec=result["normalized_spec"], out_pptx=str(output_pptx))
+                runner.success("Integrated PPT ready")
+
+            st.session_state.generate_result = {
+                "summary": f"Latest generated file: {output_pptx.name}",
+                "files": [{
+                    "label": "Download PPT",
+                    "path": str(output_pptx),
+                    "name": output_pptx.name,
+                    "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                }],
+                "preview_images": export_ppt_preview_images(output_pptx)
+            }
+        except Exception as e:
+            if "runner" in locals():
+                runner.error(f"Workflow failed: {e}")
+            else:
+                st.error(f"Workflow failed: {e}")
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
+
+clear_action = show_result_box("PPT result ready", st.session_state.generate_result, clear_key="clear_unified_generate")
+if clear_action == "clear":
+    st.session_state.generate_result = None
+    st.rerun()
